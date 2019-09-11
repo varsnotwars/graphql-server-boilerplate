@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --verbose",
+    "test": "babel src --out-dir dist && jest --verbose",
     "start": "babel src --out-dir dist && node dist/index.js"
   },
   "jest": {
     "testPathIgnorePatterns": [
-      "dist/"
+      "src/"
     ]
   },
   "repository": {
