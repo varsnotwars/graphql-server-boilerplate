@@ -1,13 +1,13 @@
-import { createServer, createOrmConnection, startServer } from '../../server';
+import { startApplication } from '../../server';
 
-test('starts server', async () => {
-    const { httpServer, typeORMConnection } = await startServer();
+test('[INTEGRATION]: starts application', async () => {
+    const { expressServer, typeORMConnection } = await startApplication();
 
-    const httpIsListening = httpServer.listening;
+    const expressIsListening = expressServer.listening;
     const ormIsConnected = typeORMConnection.isConnected;
 
-    expect(httpIsListening && ormIsConnected).toBe(true);
+    expect(expressIsListening && ormIsConnected).toBe(true);
 
-    httpServer.close();
+    expressServer.close();
     await typeORMConnection.close();
 });

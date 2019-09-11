@@ -1,26 +1,30 @@
 import { createConnection } from 'typeorm';
-import { GraphQLServer } from 'graphql-yoga';
+// import { GraphQLServer } from 'graphql-yoga';
+
+import express from 'express';
+import { ApolloServer, gql, sch } from 'apollo-server-express';
+
 import * as path from 'path';
 
 import { resolvers } from './resolvers';
+import { typeDefs } from './schema';
 
-const schemaPath = path.join(__dirname, '../src/schema.graphql');
-
-export const createServer = () => new GraphQLServer({ typeDefs: schemaPath, resolvers });
+export const createApolloServer = () => new ApolloServer({ typeDefs, resolvers });
 
 export const createOrmConnection = async () => createConnection();
 
-export const startServer = async () => {
-    const server = createServer();
+export const createExpressApp = () => express();
 
-    const connection = await createOrmConnection();
+export const startApplication = async () => {
+    const apolloServer = createApolloServer();
+    const typeORMConnection = await createOrmConnection();
+    const app = createExpressApp();
 
-    const httpServer = await server.start();
+    apolloServer.applyMiddleware({ app });
 
-    console.log('Server is running on localhost:4000');
+    const expressServer = await app.listen({ port: 4000 });
 
-    return {
-        httpServer: httpServer,
-        typeORMConnection: connection
-    };
+    console.log(`🚀 Server ready at http://localhost:4000${apolloServer.graphqlPath}`);
+
+    return { expressServer, typeORMConnection };
 };
