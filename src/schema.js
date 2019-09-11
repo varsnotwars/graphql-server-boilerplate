@@ -5,6 +5,11 @@ export const typeDefs = gql`
         hello(name: String): String!
     }
 
+    type User {
+        id: ID!
+        email: String
+    }
+
     type Mutation {
-        register(email: String!, password: String!): Boolean
+        register(email: String!, password: String!): User!
 }`;

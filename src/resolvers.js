@@ -7,6 +7,15 @@ export const resolvers = {
     },
     Mutation: {
         register: async (parent, { email, password }, context, info) => {
+            const existingUser = await User.findOne({
+                where: { email },
+                select: ['id']
+            });
+        
+            // manually check like this, so we can add registration by phone number late, where email could be null
+            if (existingUser) {
+                throw new Error('email already registered');
+            }
             const hashedPassword = await bcrypt.hash(password, 10);
 
             const userModel = User.create({
@@ -14,9 +23,9 @@ export const resolvers = {
                 password: hashedPassword
             });
 
-            await userModel.save();
+            const newUser = await userModel.save();
 
-            return true;
+            return newUser;
         }
     }
 };

@@ -13,23 +13,27 @@ test('[INTEGRATION]: can register user', async () => {
 
     const REGISTER_USER = gql`
         mutation register($email: String!, $password: String!) {
-            register(email: $email, password: $password)
+            register(email: $email, password: $password) {
+                id
+                email
+            }
         }
     `;
 
-    const email = 'test@test.com';
-    const password = 'password';
-
     const result = await mutate({
         mutation: REGISTER_USER,
-        variables: { email, password }
+        variables: {
+            email: 'test@test.com',
+            password: 'password'
+        }
     });
-    const createdUser = await User.findOne({ where: { email } })
+
     expect(!result.errors).toBe(true);
     expect(!!result.data.register).toBe(true);
 
-    expect(createdUser.email).toEqual(email);
-    expect(createdUser.password).not.toEqual(password);
+    const { email } = result.data.register;
+
+    expect(email).toEqual(email);
 
     await typeORMConnection.close();
 });
