@@ -13,9 +13,14 @@ export const createOrmConnection = async () => createConnection();
 export const startServer = async () => {
     const server = createServer();
 
-    await createOrmConnection();
+    const connection = await createOrmConnection();
 
-    await server.start();
+    const httpServer = await server.start();
 
-    console.log('Server is running on localhost:4000')
+    console.log('Server is running on localhost:4000');
+
+    return {
+        httpServer: httpServer,
+        typeORMConnection: connection
+    };
 };

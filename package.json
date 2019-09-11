@@ -7,6 +7,11 @@
     "test": "jest",
     "start": "babel src --out-dir dist && node dist/index.js"
   },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "dist/"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/varsnotwars/graphql-server-boilerplate.git"
