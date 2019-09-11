@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "babel src --out-dir dist && jest --verbose",
-    "start": "babel src --out-dir dist && node dist/index.js"
+    "test": "SET NODE_ENV=test&& babel src --out-dir dist && jest --runInBand --verbose",
+    "start": "SET NODE_ENV=development&& babel src --out-dir dist && node dist/index.js"
   },
   "jest": {
     "testPathIgnorePatterns": [
