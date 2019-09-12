@@ -1,4 +1,4 @@
-import { createConnection, getConnectionOptions } from 'typeorm';
+import { createConnection, getConnectionOptions, getConnection } from 'typeorm';
 // import { GraphQLServer } from 'graphql-yoga';
 
 import express from 'express';
@@ -11,10 +11,11 @@ import { typeDefs } from './schema';
 
 export const createApolloServer = () => new ApolloServer({ typeDefs, resolvers });
 
-export const createOrmConnection = async () => {
+export const createOrmConnection = async connName => {
     const connectionOptions = await getConnectionOptions(process.env.NODE_ENV);
-    return createConnection({ ...connectionOptions, name: "default" });
+    return createConnection({ ...connectionOptions, name: connName || "default" });
 }
+export const getOrmConnection = connName => getConnection(connName);
 
 export const createExpressApp = () => express();
 
