@@ -3,12 +3,11 @@ import { createApolloServer, createOrmConnection, getOrmConnection } from '../..
 import { gql } from 'apollo-server-express'
 import { emailAlreadyRegistered, invalidEmail, passwordTooShort } from '../../validation/errorMessages';
 
-describe('[INTEGRATION]: [ACTION]: Register [ENTITY]: User', async () => {
+describe('[UNIT] [ACTION]: Register [ENTITY]: User', async () => {
     const REGISTER_USER = gql`
         mutation register($email: String!, $password: String!) {
             register(email: $email, password: $password) {
                 id
-                email
             }
         }
     `;

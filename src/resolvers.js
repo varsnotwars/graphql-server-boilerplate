@@ -4,7 +4,7 @@ import { UserInputError } from 'apollo-server-express';
 import { emailAlreadyRegistered, invalidEmail } from './validation/errorMessages';
 import { userCreationSchema } from './validation/validationSchemas';
 import { createFromYupError } from './validation/formatters';
-import { createJWT } from './utils';
+import jwt from 'jsonwebtoken';
 
 
 export const resolvers = {
@@ -43,9 +43,11 @@ export const resolvers = {
 
             const newUser = await userModel.save();
 
-            const token = await createJWT({ id: newUser.id }, SECRET, { expiresIn: '1d' });
-            console.log(token);
             // send email logic goes here
+            // create a token below
+            const token = await jwt.sign({ id: newUser.id }, SECRET, { expiresIn: '1d' });
+            // then create a service that sends an email
+
 
             return newUser;
         }

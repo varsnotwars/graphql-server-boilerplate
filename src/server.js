@@ -10,8 +10,9 @@ import { typeDefs } from './schema';
 import { User } from './entity/User';
 
 
-
-const SECRET = 'declare vars not wars';
+// do not use this secret, create a cryptographically secure random number
+// this is only exported so it can be used in tests
+export const SECRET = 'declare vars not wars';
 
 
 export const createApolloServer = () => new ApolloServer({
