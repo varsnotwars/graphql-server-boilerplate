@@ -8,6 +8,7 @@ export const typeDefs = gql`
     type User {
         id: ID!
         email: String
+        confirmed: Boolean!
     }
 
     type Mutation {
