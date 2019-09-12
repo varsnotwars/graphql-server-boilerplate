@@ -13,9 +13,5 @@ export class User extends BaseEntity {
 
     @Column("varchar", { length: 255 })
     password = "";
-
-    @BeforeInsert()
-    addId() {
-        this.id = uuidv4();
-    }
+    
 }
