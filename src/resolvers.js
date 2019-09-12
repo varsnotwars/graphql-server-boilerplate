@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
 import { User } from './entity/User';
 import { UserInputError } from 'apollo-server-express';
-import { emailAlreadyRegistered, notValidEmail } from './validation/errorMessages';
+import { emailAlreadyRegistered, invalidEmail } from './validation/errorMessages';
 import { userCreationSchema } from './validation/validationSchemas';
-import { formatYupError } from './validation/formatters';
+import { createFromYupError } from './validation/formatters';
 
 
 export const resolvers = {
@@ -14,15 +14,15 @@ export const resolvers = {
         register: async (parent, args, context, info) => {
 
             try {
-                await userCreationSchema.validate(args, { abortEarly: false });
+                // abort early, cleaner to throw one error object instead of trying to parse and throw many errors
+                await userCreationSchema.validate(args, { abortEarly: true });
             } catch (error) {
-                console.log(formatYupError(error));
-                throw new UserInputError(formatYupError(error));
+                throw createFromYupError(error);
             }
 
 
             const existingUser = await User.findOne({
-                where: { email },
+                where: { email: args.email },
                 select: ['id']
             });
 
@@ -32,10 +32,10 @@ export const resolvers = {
                 throw new UserInputError(emailAlreadyRegistered);
             }
 
-            const hashedPassword = await bcrypt.hash(password, 10);
+            const hashedPassword = await bcrypt.hash(args.password, 10);
 
             const userModel = User.create({
-                email: email,
+                email: args.email,
                 password: hashedPassword
             });
 
