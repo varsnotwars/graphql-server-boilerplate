@@ -55,11 +55,11 @@ export const resolvers = {
 
             return newUser;
         },
-        login: async (parent, { email, password }, context, info) => {
+        login: async (parent, { email, password }, { session }, info) => {
             const conn = getConnection('default');
 
             const user = await conn
-                .createQueryBuilder('user')
+                .createQueryBuilder()
                 .select('user')
                 .from(User, 'user')
                 .where('user.email = :email', { email })
@@ -72,6 +72,8 @@ export const resolvers = {
             if (!user.confirmed) {
                 throw new ForbiddenError(unconfirmedUser);
             }
+
+            session.userId = user.id;
 
             return user;
         }

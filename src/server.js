@@ -4,7 +4,9 @@ import { ApolloServer, gql, sch } from 'apollo-server-express';
 import jwt from 'jsonwebtoken';
 import * as path from 'path';
 import nodemailer from 'nodemailer';
-
+import session from 'express-session';
+import cors from 'cors';
+import connectMysql from 'express-mysql-session';
 
 import { resolvers } from './resolvers';
 import { typeDefs } from './schema';
@@ -14,7 +16,9 @@ dotenv.config();
 
 // do not use this secret, create a cryptographically secure random number
 // this is only exported so it can be used in tests
+// TODO; move to .env file
 export const SECRET = 'declare vars not wars';
+const SESSION_SECRET = 'keyboardcat';
 
 export const transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -34,6 +38,9 @@ export const createApolloServer = () => new ApolloServer({
     context: async ({ req }) => {
         return {
             SECRET,
+            session: req
+                ? req.session
+                : null,
             origin: req && req.headers
                 ? req.headers.origin
                 : null
@@ -54,7 +61,32 @@ export const startApplication = async () => {
     const typeORMConnection = await createOrmConnection();
     const app = createExpressApp();
 
-    apolloServer.applyMiddleware({ app });
+    const MySQLStore = connectMysql(session);
+    const { host, port, username: user, password, database } = await getConnectionOptions(process.env.NODE_ENV);
+    const sessionStore = new MySQLStore({
+        host,
+        port,
+        user,
+        password,
+        database
+    });
+
+    console.log(sessionStore);
+
+    app.use(session({
+        name: 'id',
+        store: sessionStore,
+        secret: SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+        }
+    }));
+
+    app.use(cors());
 
     app.get('/confirm/:token', async (req, res) => {
         const { token } = req.params;
@@ -89,6 +121,8 @@ export const startApplication = async () => {
             }
         });
     });
+
+    apolloServer.applyMiddleware({ app });
 
     const expressServer = await app.listen({ port: 4000 });
 
