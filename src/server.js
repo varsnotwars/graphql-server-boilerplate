@@ -3,24 +3,40 @@ import express from 'express';
 import { ApolloServer, gql, sch } from 'apollo-server-express';
 import jwt from 'jsonwebtoken';
 import * as path from 'path';
+import nodemailer from 'nodemailer';
 
 
 import { resolvers } from './resolvers';
 import { typeDefs } from './schema';
 import { User } from './entity/User';
-
+import dotenv from 'dotenv';
+dotenv.config();
 
 // do not use this secret, create a cryptographically secure random number
 // this is only exported so it can be used in tests
 export const SECRET = 'declare vars not wars';
 
+export const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+    },
+    tls: {
+        rejectUnauthorized: false
+    },
+    debug: true // include SMTP traffic in the logs
+});
 
 export const createApolloServer = () => new ApolloServer({
     typeDefs,
     resolvers,
-    context: async () => {
+    context: async ({ req }) => {
         return {
-            SECRET
+            SECRET,
+            origin: req && req.headers
+                ? req.headers.origin
+                : null
         };
     }
 });
@@ -48,18 +64,25 @@ export const startApplication = async () => {
                 res.send(err);
             } else {
                 const { id } = decoded;
-                const user = await User.findOne({ where: { id } });
+                const user = await User.findOne({ where: { id }, select: ['id', 'confirmed'] });
 
                 if (user) {
-                    // QueryBuilder is most performant
-                    const updateRes = await typeORMConnection
-                        .createQueryBuilder()
-                        .update(User)
-                        .set({ confirmed: true })
-                        .where('id = :id', { id })
-                        .execute();
+                    if (user.confirmed) {
+                        // cannot invalidated jwt, they must expire
 
-                    res.send('user has been confirmed');
+                        res.send('already confirmed');
+                    } else {
+                        // QueryBuilder is most performant
+                        const updateRes = await typeORMConnection
+                            .createQueryBuilder()
+                            .update(User)
+                            .set({ confirmed: true })
+                            .where('id = :id', { id })
+                            .execute();
+
+                        res.send('user has been confirmed');
+                    }
+
                 } else {
                     res.send('user not found');
                 }

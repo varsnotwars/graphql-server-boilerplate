@@ -5,6 +5,7 @@ import { emailAlreadyRegistered, invalidEmail } from './validation/errorMessages
 import { userCreationSchema } from './validation/validationSchemas';
 import { createFromYupError } from './validation/formatters';
 import jwt from 'jsonwebtoken';
+import { emailService } from './services/email/emailService';
 
 
 export const resolvers = {
@@ -12,7 +13,7 @@ export const resolvers = {
         hello: (_, { name }) => `Hello ${name || 'World'}`
     },
     Mutation: {
-        register: async (parent, args, { SECRET }, info) => {
+        register: async (parent, args, { SECRET, origin }, info) => {
 
             try {
                 // abort early, cleaner to throw one error object instead of trying to parse and throw many errors
@@ -42,12 +43,14 @@ export const resolvers = {
             });
 
             const newUser = await userModel.save();
+            if (process.env.NODE_ENV !== 'test') {
+                const token = await jwt.sign({ id: newUser.id }, SECRET, { expiresIn: '1d' });
 
-            // send email logic goes here
-            // create a token below
-            const token = await jwt.sign({ id: newUser.id }, SECRET, { expiresIn: '1d' });
-            // then create a service that sends an email
+                const url = emailService.createConfirmationLink(origin, token);
+                const html = emailService.createConfirmEmail(url);
 
+                emailService.sendEmail(newUser.email, process.env.GMAIL_USER, 'Confirm your email', html);
+            }
 
             return newUser;
         }

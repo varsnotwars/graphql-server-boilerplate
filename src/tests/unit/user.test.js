@@ -3,7 +3,7 @@ import { createTestClient } from "apollo-server-testing";
 import jwt from 'jsonwebtoken';
 import { gql } from 'apollo-server-express';
 
-describe('[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization', async () => {
+describe('[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization', () => {
     const REGISTER_USER = gql`
         mutation register($email: String!, $password: String!) {
             register(email: $email, password: $password) {

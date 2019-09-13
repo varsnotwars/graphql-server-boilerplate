@@ -1,6 +1,6 @@
 import { createApolloServer, createOrmConnection, createExpressApp } from '../../server';
 
-describe('[UNIT] [ACTION]: Start [Service] Server/Database', async () => {
+describe('[UNIT] [ACTION]: Start [Service] Server/Database', () => {
   test('creates and starts apollo server with express', async () => {
     const apolloServer = createApolloServer();
     const app = createExpressApp();
@@ -24,4 +24,3 @@ describe('[UNIT] [ACTION]: Start [Service] Server/Database', async () => {
   });
 
 });
-
