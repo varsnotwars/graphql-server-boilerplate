@@ -1,11 +1,12 @@
 import bcrypt from 'bcryptjs';
 import { User } from './entity/User';
-import { UserInputError } from 'apollo-server-express';
-import { emailAlreadyRegistered, invalidEmail } from './validation/errorMessages';
+import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+import { emailAlreadyRegistered, invalidLogin, unconfirmedUser } from './validation/errorMessages';
 import { userCreationSchema } from './validation/validationSchemas';
 import { createFromYupError } from './validation/formatters';
 import jwt from 'jsonwebtoken';
 import { emailService } from './services/email/emailService';
+import { getConnection } from 'typeorm';
 
 
 export const resolvers = {
@@ -53,6 +54,26 @@ export const resolvers = {
             }
 
             return newUser;
+        },
+        login: async (parent, { email, password }, context, info) => {
+            const conn = getConnection('default');
+
+            const user = await conn
+                .createQueryBuilder('user')
+                .select('user')
+                .from(User, 'user')
+                .where('user.email = :email', { email })
+                .getOne();
+
+            if (!user) {
+                throw new AuthenticationError(invalidLogin);
+            }
+
+            if (!user.confirmed) {
+                throw new ForbiddenError(unconfirmedUser);
+            }
+
+            return user;
         }
     }
 };
