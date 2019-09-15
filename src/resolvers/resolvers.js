@@ -1,17 +1,31 @@
 import bcrypt from 'bcryptjs';
-import { User } from './entity/User';
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
-import { emailAlreadyRegistered, invalidLogin, unconfirmedUser } from './validation/errorMessages';
-import { userCreationSchema } from './validation/validationSchemas';
-import { createFromYupError } from './validation/formatters';
 import jwt from 'jsonwebtoken';
-import { emailService } from './services/email/emailService';
 import { getConnection } from 'typeorm';
+import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+
+import { emailService } from '../services/email/emailService';
+import { userCreationSchema } from '../validation/validationSchemas';
+import { createFromYupError } from '../validation/formatters';
+import { User } from '../entity/User';
+import { emailAlreadyRegistered, invalidLogin, unconfirmedUser } from '../validation/errorMessages';
+import { isAuthenticated } from './middleware';
+
 
 
 export const resolvers = {
     Query: {
-        hello: (_, { name }) => `Hello ${name || 'World'}`
+        me: async (parent, args, { session: { userId } }, info) => {
+            const conn = getConnection('default');
+
+            const user = await conn
+                .createQueryBuilder()
+                .select('user')
+                .from(User, 'user')
+                .where('user.id = :id', { id: userId })
+                .getOne();;
+
+            return user;
+        }
     },
     Mutation: {
         register: async (parent, args, { SECRET, origin }, info) => {
@@ -52,7 +66,7 @@ export const resolvers = {
 
                 emailService.sendEmail(newUser.email, process.env.GMAIL_USER, 'Confirm your email', html);
             }
-
+            console.log(newUser);
             return newUser;
         },
         login: async (parent, { email, password }, { session }, info) => {

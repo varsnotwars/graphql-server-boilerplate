@@ -8,7 +8,7 @@ import session from 'express-session';
 import cors from 'cors';
 import connectMysql from 'express-mysql-session';
 
-import { resolvers } from './resolvers';
+import { resolvers } from './resolvers/resolvers';
 import { typeDefs } from './schema';
 import { User } from './entity/User';
 import dotenv from 'dotenv';
@@ -57,6 +57,22 @@ export const getOrmConnection = connName => getConnection(connName);
 export const createExpressApp = () => express();
 
 export const startApplication = async () => {
+    const envConfig = {
+        'test': {
+            port: 4000,
+            host: 'http://localhost'
+        },
+        'development': {
+            port: 4000,
+            host: 'http://localhost'
+        },
+        'production': {
+
+        }
+    };
+
+    const environment = envConfig[process.env.NODE_env];
+
     const apolloServer = createApolloServer();
     const typeORMConnection = await createOrmConnection();
     const app = createExpressApp();
@@ -70,8 +86,6 @@ export const startApplication = async () => {
         password,
         database
     });
-
-    console.log(sessionStore);
 
     app.use(session({
         name: 'id',
@@ -124,9 +138,14 @@ export const startApplication = async () => {
 
     apolloServer.applyMiddleware({ app });
 
-    const expressServer = await app.listen({ port: 4000 });
+    const expressServer = await app.listen({ port: environment.port });
 
-    console.log(`🚀 Server ready at http://localhost:4000${apolloServer.graphqlPath}`);
+    console.log(`🚀 Server ready at ${environment.host}:${environment.port}${apolloServer.graphqlPath}`);
 
-    return { expressServer, typeORMConnection };
+    return {
+        expressServer,
+        typeORMConnection,
+        apolloServer,
+        environment
+    };
 };
