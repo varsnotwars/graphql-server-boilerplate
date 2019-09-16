@@ -60,11 +60,13 @@ export const startApplication = async () => {
     const envConfig = {
         'test': {
             port: 4000,
-            host: 'http://localhost'
+            host: 'http://localhost',
+            graphqlPath: ''
         },
         'development': {
             port: 4000,
-            host: 'http://localhost'
+            host: 'http://localhost',
+            graphqlPath: ''
         },
         'production': {
 
@@ -100,7 +102,11 @@ export const startApplication = async () => {
         }
     }));
 
-    app.use(cors());
+    app.use(cors({
+        origin: '*',
+        methods:['GET','POST'],
+        credentials: true // enable set cookie
+    }));
 
     app.get('/confirm/:token', async (req, res) => {
         const { token } = req.params;
@@ -139,6 +145,9 @@ export const startApplication = async () => {
     apolloServer.applyMiddleware({ app });
 
     const expressServer = await app.listen({ port: environment.port });
+    // set environment graphql path
+    environment.graphqlPath = apolloServer.graphqlPath;
+
 
     console.log(`🚀 Server ready at ${environment.host}:${environment.port}${apolloServer.graphqlPath}`);
 

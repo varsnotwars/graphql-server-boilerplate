@@ -25,6 +25,7 @@ describe('[UNIT] [ACTION]: Send [Service] Email', () => {
 
         expect(confirmationLink).toBe(testConfirmationLink);
 
+        // TODO: create file with confirm email template for better testing
         const testHtmlBody = `Please click <a href="${testConfirmationLink}">here</a> to confirm email.`;
 
         const htmlBody = emailService.createConfirmEmail(confirmationLink);

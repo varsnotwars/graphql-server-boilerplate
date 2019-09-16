@@ -2,56 +2,78 @@ import { createTestClient } from "apollo-server-testing";
 import jwt from 'jsonwebtoken';
 import { gql } from 'apollo-server-express';
 import axios from 'axios';
+axios.defaults.withCredentials = true;
+import { request } from 'graphql-request';
 
 import { createApolloServer, createOrmConnection, getOrmConnection, SECRET, startApplication } from '../../server';
 import { invalidLogin, unconfirmedUser } from '../../validation/errorMessages';
 import { emailService } from '../../services/email/emailService';
 
 describe('[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization', () => {
-    const REGISTER_USER = gql`
-        mutation register($email: String!, $password: String!) {
-            register(email: $email, password: $password) {
+    const registerMutation = (email, password) => `
+        mutation {
+            register(email: "${email}", password: "${password}") {
                 id
             }
         }
     `;
-    const LOGIN_USER = gql`
-        mutation login($email: String!, $password: String!) {
-            login(email: $email, password: $password) {
+
+    const loginMutation = (email, password) => `
+        mutation login {
+            login(email: "${email}", password: "${password}") {
                 id
                 email
             }
         }
     `;
 
-    const USER_PROFILE = gql`
+    const meQuery = () => `
         query me {
             me {
                 id
                 email
             }
         }
-`;
+    `;
 
-    let expressServer, apolloServer, typeORMConnection, environment;
+    // const REGISTER_USER = gql`
+    //     mutation register($email: String!, $password: String!) {
+    //         register(email: $email, password: $password) {
+    //             id
+    //         }
+    //     }
+    // `;
+    // const LOGIN_USER = gql`
+    //     mutation login($email: String!, $password: String!) {
+    //         login(email: $email, password: $password) {
+    //             id
+    //             email
+    //         }
+    //     }
+    // `;
 
+    // const USER_PROFILE = gql`
+    //     query me {
+    //         me {
+    //             id
+    //             email
+    //         }
+    //     }
+    // `;
 
-    let mutate, query;
+    let expressServer, apolloServer, typeORMConnection, environment, url;
 
     const testEmail = 'test@test.com';
     const testPassword = 'password';
 
     beforeEach(async () => {
         const app = await startApplication();
-        const client = createTestClient(apolloServer);
-        console.log(client);
-        mutate = client.mutate;
-        query = client.query;
+
         expressServer = app.expressServer;
         apolloServer = app.apolloServer;
-        typeORMConnection = app.typeORMConnection
+        typeORMConnection = app.typeORMConnection;
         environment = app.environment;
-
+        url = `${environment.host}:${environment.port}${environment.graphqlPath}`;
     });
 
     afterEach(async () => {
@@ -121,54 +143,50 @@ describe('[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization', () =
     // });
 
     test('can get logged in user', async () => {
-        // create confirmed user
-        const registerResult = await mutate({
-            mutation: REGISTER_USER,
-            variables: {
-                email: testEmail,
-                password: testPassword
-            }
-        });
+        // create user
+        const registerResult = await request(
+            url,
+            registerMutation(testEmail, testPassword)
+        );
 
-        expect(registerResult.errors).toBeFalsy();
-        expect(registerResult.data.register).toBeTruthy();
+        expect(registerResult.register).toBeTruthy();
 
-        const token = await jwt.sign({ id: registerResult.data.register.id }, SECRET, { expiresIn: '5m' });
-        const link = emailService.createConfirmationLink(`${environment.host}:${environment.port}`);
-        console.log(link);
+        // create confirmation token
+        const token = await jwt.sign({ id: registerResult.register.id }, SECRET, { expiresIn: '5m' });
+
+        // create confirmation url link
+        const link = emailService.createConfirmationLink(`${environment.host}:${environment.port}`, token);
 
         // confirm user
-        await axios.get(link);
+        const confirmResult = await axios.get(link);
+
+        // TODO: move this message to a const
+        expect(confirmResult.data).toBe('user has been confirmed');
 
         // login
-        const loginResult = await mutate({
-            mutation: LOGIN_USER,
-            variables: {
-                email: testEmail,
-                password: testPassword
+        const loginResult = await axios.post(
+            url,
+            {
+                query: loginMutation(testEmail, testPassword)
+            },
+            {
+                withCredentials: true
             }
-        });
+        );
+        // console.log(loginResult);
+        expect(loginResult.data).toBeTruthy();
+        expect(loginResult.data.data.login).toEqual({ email: testEmail, id: registerResult.register.id });
 
-        expect(loginResult.errors).toBeFalsy();
-        expect(registerResult.data.login).toBeTruthy();
-
-        const profileResult = await query({
-            query: USER_PROFILE
-        });
-
-        console.log(profileResult);
-
-
-        // const loginResult = await mutate({
-        //     mutation: LOGIN_USER,
-        //     variables: {
-        //         email: testEmail,
-        //         password: testPassword
-        //     }
-        // });
-
-        // expect(loginResult.errors).toBeTruthy();
-        // expect(loginResult.errors.length).not.toBe(0);
-        // expect(loginResult.errors.some(e => e === unconfirmedUser));
+        // query profile
+        const meResult = await axios.post(
+            url,
+            {
+                query: meQuery()
+            },
+            {
+                withCredentials: true
+            }
+        );
+        // console.log(meResult);
     });
 });

@@ -7,29 +7,28 @@ import { emailService } from '../services/email/emailService';
 import { userCreationSchema } from '../validation/validationSchemas';
 import { createFromYupError } from '../validation/formatters';
 import { User } from '../entity/User';
-import { emailAlreadyRegistered, invalidLogin, unconfirmedUser } from '../validation/errorMessages';
-import { isAuthenticated } from './middleware';
+import { emailAlreadyRegistered, invalidLogin, unconfirmedUser, mustBeLoggedIn } from '../validation/errorMessages';
+import { isAuthenticated } from './accessControl';
 
 
 
 export const resolvers = {
     Query: {
-        me: async (parent, args, { session: { userId } }, info) => {
+        me: isAuthenticated.createResolver(async (parent, args, { session }, info) => {
             const conn = getConnection('default');
 
             const user = await conn
                 .createQueryBuilder()
                 .select('user')
                 .from(User, 'user')
-                .where('user.id = :id', { id: userId })
+                .where('user.id = :id', { id: session.userId })
                 .getOne();;
 
             return user;
-        }
+        })
     },
     Mutation: {
         register: async (parent, args, { SECRET, origin }, info) => {
-
             try {
                 // abort early, cleaner to throw one error object instead of trying to parse and throw many errors
                 await userCreationSchema.validate(args, { abortEarly: true });
@@ -66,10 +65,11 @@ export const resolvers = {
 
                 emailService.sendEmail(newUser.email, process.env.GMAIL_USER, 'Confirm your email', html);
             }
-            console.log(newUser);
+
             return newUser;
         },
         login: async (parent, { email, password }, { session }, info) => {
+            console.log('before login: ', session);
             const conn = getConnection('default');
 
             const user = await conn
@@ -88,7 +88,7 @@ export const resolvers = {
             }
 
             session.userId = user.id;
-
+            console.log('after login: ', session);
             return user;
         }
     }
