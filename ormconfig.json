@@ -1,53 +1,41 @@
 [
-   {
-      "name": "development",
-      "type": "mysql",
-      "host": "localhost",
-      "port": 3306,
-      "username": "root",
-      "password": "password",
-      "database": "graphql_server_boilerplate",
-      "synchronize": true,
-      "logging": true,
-      "entities": [
-         "dist/entity/*.js"
-      ],
-      "migrations": [
-         "dist/migration/*.js"
-      ],
-      "subscribers": [
-         "dist/subscriber/*.js"
-      ],
-      "cli": {
-         "entitiesDir": "dist/entity",
-         "migrationsDir": "dist/migration",
-         "subscribersDir": "dist/subscriber"
-      }
-   },
-   {
-      "name": "test",
-      "type": "mysql",
-      "host": "localhost",
-      "port": 3306,
-      "username": "root",
-      "password": "password",
-      "database": "graphql_server_boilerplate_test",
-      "synchronize": true,
-      "logging": false,
-      "dropSchema": true,
-      "entities": [
-         "dist/entity/*.js"
-      ],
-      "migrations": [
-         "dist/migration/*.js"
-      ],
-      "subscribers": [
-         "dist/subscriber/*.js"
-      ],
-      "cli": {
-         "entitiesDir": "dist/entity",
-         "migrationsDir": "dist/migration",
-         "subscribersDir": "dist/subscriber"
-      }
-   }
+  {
+    "name": "development",
+    "type": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "root",
+    "password": "password",
+    "database": "graphql_server_boilerplate",
+    "synchronize": true,
+    "logging": true,
+    "entities": ["dist/entity/*.js"],
+    "migrations": ["dist/migration/*.js"],
+    "subscribers": ["dist/subscriber/*.js"],
+    "cli": {
+      "entitiesDir": "dist/entity",
+      "migrationsDir": "dist/migration",
+      "subscribersDir": "dist/subscriber"
+    }
+  },
+  {
+    "name": "test",
+    "type": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "root",
+    "password": "password",
+    "database": "graphql_server_boilerplate_test",
+    "synchronize": true,
+    "logging": false,
+    "dropSchema": true,
+    "entities": ["dist/entity/*.js"],
+    "migrations": ["dist/migration/*.js"],
+    "subscribers": ["dist/subscriber/*.js"],
+    "cli": {
+      "entitiesDir": "dist/entity",
+      "migrationsDir": "dist/migration",
+      "subscribersDir": "dist/subscriber"
+    }
+  }
 ]
