@@ -1,108 +1,70 @@
-import { createTestClient } from "apollo-server-testing";
-import {
-  createApolloServer,
-  createOrmConnection,
-  getOrmConnection
-} from "../../server";
-import { gql } from "apollo-server-express";
 import {
   emailAlreadyRegistered,
   invalidEmail,
   passwordTooShort
 } from "../../validation/errorMessages";
+import { startApplication } from "../../server";
+import { TestClient } from "../TestClient";
 
 describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
-  const REGISTER_USER = gql`
-    mutation register($email: String!, $password: String!) {
-      register(email: $email, password: $password) {
-        id
-      }
-    }
-  `;
+  let expressServer, apolloServer, typeORMConnection, environment, url;
 
-  // we can resuse this as the api won't change between tests
-  const apolloServer = createApolloServer();
-
-  const { mutate } = createTestClient(apolloServer);
+  const testEmail = "test@test.com";
+  const testPassword = "password";
 
   beforeEach(async () => {
-    await createOrmConnection("default");
+    const app = await startApplication();
+
+    expressServer = app.expressServer;
+    apolloServer = app.apolloServer;
+    typeORMConnection = app.typeORMConnection;
+    environment = app.environment;
+    url = `${environment.host}:${environment.port}${environment.graphqlPath}`;
   });
 
   afterEach(async () => {
-    await getOrmConnection("default").close();
-  });
-
-  afterAll(async () => {
-    // just in case
-    const activeConn = await getOrmConnection("default");
-
-    activeConn.isConnected ? await activeConn.close() : null;
+    expressServer.close();
+    await typeORMConnection.close();
   });
 
   test("can register user", async () => {
-    const result = await mutate({
-      mutation: REGISTER_USER,
-      variables: {
-        email: "test@test.com",
-        password: "password"
-      }
-    });
+    const client = new TestClient(url);
 
-    expect(!result.errors).toBe(true);
-    expect(!!result.data.register).toBe(true);
+    const result = await client.register(testEmail, testPassword);
+    expect(result.data.register).toBeTruthy();
 
     const { email } = result.data.register;
-
-    expect(email).toEqual(email);
+    expect(email).toEqual(testEmail);
   });
 
   test("cannot register same email twice", async () => {
-    const result1 = await mutate({
-      mutation: REGISTER_USER,
-      variables: {
-        email: "test@test.com",
-        password: "password"
-      }
-    });
+    const client = new TestClient(url);
 
-    const result2 = await mutate({
-      mutation: REGISTER_USER,
-      variables: {
-        email: "test@test.com",
-        password: "password"
-      }
-    });
+    const result1 = await client.register(testEmail, testPassword);
+    expect(result1.data.register).toBeTruthy();
+    const result2 = await client.register(testEmail, testPassword);
 
-    expect(result2.errors.length).not.toBe(0);
+    expect(result2.errors).toBeTruthy();
     expect(
       result2.errors.some(e => e.message === emailAlreadyRegistered)
     ).toBeTruthy();
   });
 
   test("cannot register invalid email", async () => {
-    const result = await mutate({
-      mutation: REGISTER_USER,
-      variables: {
-        email: "test.com",
-        password: "password"
-      }
-    });
+    const client = new TestClient(url);
 
-    expect(result.errors.length).not.toBe(0);
+    const result = await client.register("InvalidEmail", testPassword);
+
+    expect(result.errors).toBeTruthy();
     expect(result.errors.some(e => e.message === invalidEmail)).toBeTruthy();
   });
 
   test("cannot register invalid password", async () => {
-    const result = await mutate({
-      mutation: REGISTER_USER,
-      variables: {
-        email: "test@test.com",
-        password: "1234567"
-      }
-    });
+    const client = new TestClient(url);
 
-    expect(result.errors.length).not.toBe(0);
+    const result = await client.register(testEmail, "abc");
+
+    expect(result.errors).toBeTruthy();
     expect(
       result.errors.some(e => e.message === passwordTooShort)
     ).toBeTruthy();

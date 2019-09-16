@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { request } from "graphql-request";
 
 import { SECRET, startApplication } from "../../server";
 import {
@@ -12,38 +11,6 @@ import { emailService } from "../../services/email/emailService";
 import { TestClient } from "../TestClient";
 
 describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
-  const registerMutation = (email, password) => `
-        mutation {
-            register(email: "${email}", password: "${password}") {
-                id
-            }
-        }
-`;
-
-  const loginMutation = (email, password) => `
-        mutation login {
-            login(email: "${email}", password: "${password}") {
-                id
-                email
-            }
-        }
-`;
-
-  const meQuery = () => `
-        query me {
-            me {
-                id
-                email
-            }
-        }
-`;
-
-  const logoutMutation = () => `
-    mutation logout {
-        logout
-    }
-`;
-
   let expressServer, apolloServer, typeORMConnection, environment, url;
 
   const testEmail = "test@test.com";
@@ -65,14 +32,12 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
   });
 
   test("can create a valid jwt for a new user", async () => {
-    const result = await request(
-      url,
-      registerMutation(testEmail, testPassword)
-    );
+    const client = new TestClient(url);
+    const result = await client.register(testEmail, testPassword);
 
-    expect(result.register).toBeTruthy();
+    expect(result.data.register).toBeTruthy();
 
-    const { id } = result.register;
+    const { id } = result.data.register;
 
     const token = jwt.sign({ id }, SECRET, { expiresIn: "1m" });
 
@@ -200,7 +165,7 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
 
     expect(loginResult.errors).toBeTruthy();
     expect(
-      loginResult.data.errors.some(e => e.message === invalidLogin)
+      loginResult.errors.some(e => e.message === invalidLogin)
     ).toBeTruthy();
   });
 
