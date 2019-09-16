@@ -87,66 +87,66 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
     await typeORMConnection.close();
   });
 
-  // test('can create a valid jwt for a new user', async () => {
-  //     const result = await mutate({
-  //         mutation: REGISTER_USER,
-  //         variables: {
-  //             email: testEmail,
-  //             password: testPassword
-  //         }
-  //     });
-  //     expect(!result.errors).toBe(true);
-  //     expect(!!result.data.register).toBe(true);
+  test("can create a valid jwt for a new user", async () => {
+    const result = await mutate({
+      mutation: REGISTER_USER,
+      variables: {
+        email: testEmail,
+        password: testPassword
+      }
+    });
+    expect(!result.errors).toBe(true);
+    expect(!!result.data.register).toBe(true);
 
-  //     const { id } = result.data.register;
+    const { id } = result.data.register;
 
-  //     const token = await jwt.sign({ id }, SECRET, { expiresIn: '1m' });
+    const token = await jwt.sign({ id }, SECRET, { expiresIn: "1m" });
 
-  //     jwt.verify(token, SECRET, async (err, decoded) => {
-  //         expect(!err).toBe(true);
-  //         expect(decoded.id).toBe(id);
-  //     });
-  // });
+    jwt.verify(token, SECRET, async (err, decoded) => {
+      expect(!err).toBe(true);
+      expect(decoded.id).toBe(id);
+    });
+  });
 
-  // test('login will throw error when email not found', async () => {
-  //     const result = await mutate({
-  //         mutation: LOGIN_USER,
-  //         variables: {
-  //             email: testEmail,
-  //             password: testPassword
-  //         }
-  //     });
+  test("login will throw error when email not found", async () => {
+    const result = await mutate({
+      mutation: LOGIN_USER,
+      variables: {
+        email: testEmail,
+        password: testPassword
+      }
+    });
 
-  //     expect(result.errors).toBeTruthy();
-  //     expect(result.errors.length).not.toBe(0);
-  //     expect(result.errors.some(e => e === invalidLogin));
-  // });
+    expect(result.errors).toBeTruthy();
+    expect(result.errors.length).not.toBe(0);
+    expect(result.errors.some(e => e === invalidLogin));
+  });
 
-  // test('login will throw error when not confirmed', async () => {
-  //     const registerResult = await mutate({
-  //         mutation: REGISTER_USER,
-  //         variables: {
-  //             email: testEmail,
-  //             password: testPassword
-  //         }
-  //     });
+  test("login will throw error when not confirmed", async () => {
+    const registerResult = await mutate({
+      mutation: REGISTER_USER,
+      variables: {
+        email: testEmail,
+        password: testPassword
+      }
+    });
 
-  //     expect(registerResult.errors).toBeFalsy();
-  //     expect(registerResult.data.register).toBeTruthy();
-  //     expect(registerResult.data.register.confirmed).toBeFalsy();
+    expect(registerResult.errors).toBeFalsy();
+    expect(registerResult.data.register).toBeTruthy();
+    expect(registerResult.data.register.confirmed).toBeFalsy();
 
-  //     const loginResult = await mutate({
-  //         mutation: LOGIN_USER,
-  //         variables: {
-  //             email: testEmail,
-  //             password: testPassword
-  //         }
-  //     });
+    const loginResult = await mutate({
+      mutation: LOGIN_USER,
+      variables: {
+        email: testEmail,
+        password: testPassword
+      }
+    });
 
-  //     expect(loginResult.errors).toBeTruthy();
-  //     expect(loginResult.errors.length).not.toBe(0);
-  //     expect(loginResult.errors.some(e => e === unconfirmedUser));
-  // });
+    expect(loginResult.errors).toBeTruthy();
+    expect(loginResult.errors.length).not.toBe(0);
+    expect(loginResult.errors.some(e => e === unconfirmedUser));
+  });
 
   test("can get logged in user", async () => {
     const axiosInstance = axios.create({ baseURL: url });
