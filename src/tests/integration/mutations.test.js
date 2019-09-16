@@ -75,7 +75,9 @@ describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
     });
 
     expect(result2.errors.length).not.toBe(0);
-    expect(result2.errors.some(e => e.message === emailAlreadyRegistered));
+    expect(
+      result2.errors.some(e => e.message === emailAlreadyRegistered)
+    ).toBeTruthy();
   });
 
   test("cannot register invalid email", async () => {
@@ -88,7 +90,7 @@ describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
     });
 
     expect(result.errors.length).not.toBe(0);
-    expect(result.errors.some(e => e.message === invalidEmail));
+    expect(result.errors.some(e => e.message === invalidEmail)).toBeTruthy();
   });
 
   test("cannot register invalid password", async () => {
@@ -101,6 +103,8 @@ describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
     });
 
     expect(result.errors.length).not.toBe(0);
-    expect(result.errors.some(e => e.message === passwordTooShort));
+    expect(
+      result.errors.some(e => e.message === passwordTooShort)
+    ).toBeTruthy();
   });
 });

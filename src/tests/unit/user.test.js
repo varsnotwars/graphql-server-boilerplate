@@ -6,7 +6,11 @@ axios.defaults.withCredentials = true;
 import { request } from "graphql-request";
 
 import { SECRET, startApplication } from "../../server";
-import { invalidLogin, unconfirmedUser } from "../../validation/errorMessages";
+import {
+  unconfirmedUser,
+  mustBeLoggedIn,
+  invalidEmail
+} from "../../validation/errorMessages";
 import { emailService } from "../../services/email/emailService";
 
 describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () => {
@@ -88,7 +92,9 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
     );
 
     expect(result.data.errors).toBeTruthy();
-    expect(result.data.errors.some(e => e.message === invalidLogin));
+    expect(
+      result.data.errors.some(e => e.message === invalidEmail)
+    ).toBeTruthy();
   });
 
   test("login will throw error when not confirmed", async () => {
@@ -109,9 +115,11 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
         withCredentials: true
       }
     );
-
+    console.log(loginResult.data.errors);
     expect(loginResult.data.errors).toBeTruthy();
-    expect(loginResult.data.errors.some(e => e.message === unconfirmedUser));
+    expect(
+      loginResult.data.errors.some(e => e.message === unconfirmedUser)
+    ).toBeTruthy();
   });
 
   test("can get logged in user", async () => {
@@ -187,5 +195,22 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
         id: registerResult.register.id
       }
     });
+  });
+
+  test("cannot query me while unauthenticated", async () => {
+    const result = await axios.post(
+      url,
+      {
+        query: meQuery()
+      },
+      {
+        withCredentials: true
+      }
+    );
+
+    expect(result.data.errors).toBeTruthy();
+    expect(
+      result.data.errors.some(e => e.message === mustBeLoggedIn)
+    ).toBeTruthy();
   });
 });

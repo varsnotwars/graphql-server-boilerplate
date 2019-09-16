@@ -1,19 +1,16 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { getConnection } from "typeorm";
-import { AuthenticationError, ForbiddenError } from "apollo-server-express";
-
 import { emailService } from "../services/email/emailService";
 import { userCreationSchema } from "../validation/validationSchemas";
 import { createFromYupError } from "../validation/formatters";
 import { User } from "../entity/User";
-import {
-  emailAlreadyRegistered,
-  invalidLogin,
-  unconfirmedUser,
-  mustBeLoggedIn
-} from "../validation/errorMessages";
 import { isAuthenticated } from "./accessControl";
+import {
+  InvalidLoginError,
+  UnconfirmedUserError,
+  EmailAlreadyRegisteredError
+} from "../validation/graphqlErrors";
 
 export const resolvers = {
   Query: {
@@ -49,7 +46,7 @@ export const resolvers = {
       // manually check like this, instead of adding the constraint at the db level
       // so we can add registration by phone number later, where email could be null
       if (existingUser) {
-        throw new UserInputError(emailAlreadyRegistered);
+        throw new EmailAlreadyRegisteredError();
       }
 
       const hashedPassword = await bcrypt.hash(args.password, 10);
@@ -89,16 +86,29 @@ export const resolvers = {
         .getOne();
 
       if (!user) {
-        throw new AuthenticationError(invalidLogin);
+        throw new InvalidLoginError();
       }
 
+      // TODO: check password!!!!!
+
       if (!user.confirmed) {
-        throw new ForbiddenError(unconfirmedUser);
+        throw new UnconfirmedUserError();
       }
 
       session.userId = user.id;
 
       return user;
+    },
+    logout: async (parent, { email, password }, { session }, info) => {
+      return new Promise((resolve, reject) => {
+        session.destroy(err => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(true);
+          }
+        });
+      });
     }
   }
 };

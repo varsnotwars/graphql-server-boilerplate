@@ -1,8 +1,9 @@
 import { createResolver } from "apollo-resolvers";
-import { mustBeLoggedIn } from "../validation/errorMessages";
-import { AuthenticationError } from "apollo-server-express";
 import { isInstance } from "apollo-errors";
-import { UnknownError } from "../validation/graphqlErrors";
+import {
+  UnknownError,
+  AuthenticationRequiredError
+} from "../validation/graphqlErrors";
 
 const baseResolver = createResolver(
   //incoming requests will pass through this resolver like a no-op
@@ -19,7 +20,7 @@ const baseResolver = createResolver(
 export const isAuthenticated = baseResolver.createResolver(
   (parent, args, { session }, info) => {
     if (!session.userId) {
-      throw new AuthenticationError(mustBeLoggedIn);
+      throw new AuthenticationRequiredError();
     }
   }
 );
