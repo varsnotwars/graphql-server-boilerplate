@@ -1,17 +1,11 @@
-import { createTestClient } from "apollo-server-testing";
 import jwt from "jsonwebtoken";
-import { gql } from "apollo-server-express";
+
 import axios from "axios";
 axios.defaults.withCredentials = true;
+
 import { request } from "graphql-request";
 
-import {
-  createApolloServer,
-  createOrmConnection,
-  getOrmConnection,
-  SECRET,
-  startApplication
-} from "../../server";
+import { SECRET, startApplication } from "../../server";
 import { invalidLogin, unconfirmedUser } from "../../validation/errorMessages";
 import { emailService } from "../../services/email/emailService";
 
@@ -42,31 +36,6 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
         }
     `;
 
-  // const REGISTER_USER = gql`
-  //     mutation register($email: String!, $password: String!) {
-  //         register(email: $email, password: $password) {
-  //             id
-  //         }
-  //     }
-  // `;
-  // const LOGIN_USER = gql`
-  //     mutation login($email: String!, $password: String!) {
-  //         login(email: $email, password: $password) {
-  //             id
-  //             email
-  //         }
-  //     }
-  // `;
-
-  // const USER_PROFILE = gql`
-  //     query me {
-  //         me {
-  //             id
-  //             email
-  //         }
-  //     }
-  // `;
-
   let expressServer, apolloServer, typeORMConnection, environment, url;
 
   const testEmail = "test@test.com";
@@ -88,64 +57,61 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
   });
 
   test("can create a valid jwt for a new user", async () => {
-    const result = await mutate({
-      mutation: REGISTER_USER,
-      variables: {
-        email: testEmail,
-        password: testPassword
-      }
-    });
-    expect(!result.errors).toBe(true);
-    expect(!!result.data.register).toBe(true);
+    const result = await request(
+      url,
+      registerMutation(testEmail, testPassword)
+    );
 
-    const { id } = result.data.register;
+    expect(result.register).toBeTruthy();
+
+    const { id } = result.register;
 
     const token = await jwt.sign({ id }, SECRET, { expiresIn: "1m" });
 
     jwt.verify(token, SECRET, async (err, decoded) => {
-      expect(!err).toBe(true);
+      expect(err).toBeFalsy();
       expect(decoded.id).toBe(id);
     });
   });
 
   test("login will throw error when email not found", async () => {
-    const result = await mutate({
-      mutation: LOGIN_USER,
-      variables: {
-        email: testEmail,
-        password: testPassword
-      }
-    });
+    const axiosInstance = axios.create({ baseURL: url });
 
-    expect(result.errors).toBeTruthy();
-    expect(result.errors.length).not.toBe(0);
-    expect(result.errors.some(e => e === invalidLogin));
+    const result = await axiosInstance.post(
+      url,
+      {
+        query: loginMutation(testEmail, testPassword)
+      },
+      {
+        withCredentials: true
+      }
+    );
+
+    expect(result.data.errors).toBeTruthy();
+    expect(result.data.errors.some(e => e.message === invalidLogin));
   });
 
   test("login will throw error when not confirmed", async () => {
-    const registerResult = await mutate({
-      mutation: REGISTER_USER,
-      variables: {
-        email: testEmail,
-        password: testPassword
+    const axiosInstance = axios.create({ baseURL: url });
+    const registerResult = await request(
+      url,
+      registerMutation(testEmail, testPassword)
+    );
+
+    expect(registerResult.register).toBeTruthy();
+
+    const loginResult = await axiosInstance.post(
+      url,
+      {
+        query: loginMutation(testEmail, testPassword)
+      },
+      {
+        withCredentials: true
       }
-    });
+    );
 
-    expect(registerResult.errors).toBeFalsy();
-    expect(registerResult.data.register).toBeTruthy();
-    expect(registerResult.data.register.confirmed).toBeFalsy();
-
-    const loginResult = await mutate({
-      mutation: LOGIN_USER,
-      variables: {
-        email: testEmail,
-        password: testPassword
-      }
-    });
-
-    expect(loginResult.errors).toBeTruthy();
-    expect(loginResult.errors.length).not.toBe(0);
-    expect(loginResult.errors.some(e => e === unconfirmedUser));
+    expect(loginResult.data.errors).toBeTruthy();
+    expect(loginResult.data.errors.some(e => e.message === unconfirmedUser));
   });
 
   test("can get logged in user", async () => {
