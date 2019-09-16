@@ -21,7 +21,7 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
                 id
             }
         }
-    `;
+`;
 
   const loginMutation = (email, password) => `
         mutation login {
@@ -30,7 +30,7 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
                 email
             }
         }
-    `;
+`;
 
   const meQuery = () => `
         query me {
@@ -39,7 +39,13 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
                 email
             }
         }
-    `;
+`;
+
+  const logoutMutation = () => `
+    mutation logout {
+        logout
+    }
+`;
 
   let expressServer, apolloServer, typeORMConnection, environment, url;
 
@@ -196,6 +202,109 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
         id: registerResult.register.id
       }
     });
+  });
+
+  test("can logout user", async () => {
+    const axiosInstance = axios.create({ baseURL: url });
+
+    // create user
+    const registerResult = await request(
+      url,
+      registerMutation(testEmail, testPassword)
+    );
+
+    expect(registerResult.register).toBeTruthy();
+
+    // create confirmation token
+    const token = await jwt.sign(
+      {
+        id: registerResult.register.id
+      },
+      SECRET,
+      {
+        expiresIn: "5m"
+      }
+    );
+
+    // create confirmation url link
+    const link = emailService.createConfirmationLink(
+      `${environment.host}:${environment.port}`,
+      token
+    );
+
+    // confirm user
+    const confirmResult = await axiosInstance.get(link);
+
+    // TODO: move this message to a const
+    expect(confirmResult.data).toBe("user has been confirmed");
+
+    // login
+    const loginResult = await axiosInstance.post(
+      url,
+      {
+        query: loginMutation(testEmail, testPassword)
+      },
+      {
+        withCredentials: true
+      }
+    );
+
+    expect(loginResult.data).toBeTruthy();
+    expect(loginResult.data.data.login).toEqual({
+      email: testEmail,
+      id: registerResult.register.id
+    });
+
+    // withCredentials only works from the frontend so we need to do this
+    const cookie = loginResult.headers["set-cookie"][0];
+
+    axiosInstance.defaults.headers.Cookie = cookie;
+
+    // query profile
+    const meResult = await axiosInstance.post(
+      url,
+      {
+        query: meQuery()
+      },
+      {
+        withCredentials: true
+      }
+    );
+
+    expect(meResult.data.data).toEqual({
+      me: {
+        email: testEmail,
+        id: registerResult.register.id
+      }
+    });
+
+    // log user out
+    const logoutResult = await axiosInstance.post(
+      url,
+      {
+        query: logoutMutation()
+      },
+      {
+        withCredentials: true
+      }
+    );
+
+    expect(logoutResult.data.data.logout).toBe(true);
+
+    const meLoggedOutResult = await axiosInstance.post(
+      url,
+      {
+        query: meQuery()
+      },
+      {
+        withCredentials: true
+      }
+    );
+
+    expect(meLoggedOutResult.data.errors).toBeTruthy();
+    expect(
+      meLoggedOutResult.data.errors.some(e => e.message === mustBeLoggedIn)
+    ).toBeTruthy();
   });
 
   test("login throws error for incorrect password", async () => {
