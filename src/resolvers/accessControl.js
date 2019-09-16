@@ -18,7 +18,6 @@ const baseResolver = createResolver(
 
 export const isAuthenticated = baseResolver.createResolver(
   (parent, args, { session }, info) => {
-    console.log(session);
     if (!session.userId) {
       throw new AuthenticationError(mustBeLoggedIn);
     }

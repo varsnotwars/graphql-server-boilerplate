@@ -149,6 +149,8 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
   // });
 
   test("can get logged in user", async () => {
+    const axiosInstance = axios.create({ baseURL: url });
+
     // create user
     const registerResult = await request(
       url,
@@ -158,9 +160,15 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
     expect(registerResult.register).toBeTruthy();
 
     // create confirmation token
-    const token = await jwt.sign({ id: registerResult.register.id }, SECRET, {
-      expiresIn: "5m"
-    });
+    const token = await jwt.sign(
+      {
+        id: registerResult.register.id
+      },
+      SECRET,
+      {
+        expiresIn: "5m"
+      }
+    );
 
     // create confirmation url link
     const link = emailService.createConfirmationLink(
@@ -169,13 +177,13 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
     );
 
     // confirm user
-    const confirmResult = await axios.get(link);
+    const confirmResult = await axiosInstance.get(link);
 
     // TODO: move this message to a const
     expect(confirmResult.data).toBe("user has been confirmed");
 
     // login
-    const loginResult = await axios.post(
+    const loginResult = await axiosInstance.post(
       url,
       {
         query: loginMutation(testEmail, testPassword)
@@ -191,8 +199,13 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
       id: registerResult.register.id
     });
 
+    // withCredentials only works from the frontend so we need to do this
+    const cookie = loginResult.headers["set-cookie"][0];
+
+    axiosInstance.defaults.headers.Cookie = cookie;
+
     // query profile
-    const meResult = await axios.post(
+    const meResult = await axiosInstance.post(
       url,
       {
         query: meQuery()
@@ -201,6 +214,12 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
         withCredentials: true
       }
     );
-    // console.log(meResult);
+
+    expect(meResult.data.data).toEqual({
+      me: {
+        email: testEmail,
+        id: registerResult.register.id
+      }
+    });
   });
 });

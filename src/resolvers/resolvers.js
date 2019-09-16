@@ -79,7 +79,6 @@ export const resolvers = {
       return newUser;
     },
     login: async (parent, { email, password }, { session }, info) => {
-      console.log("before login: ", session);
       const conn = getConnection("default");
 
       const user = await conn
@@ -98,7 +97,7 @@ export const resolvers = {
       }
 
       session.userId = user.id;
-      console.log("after login: ", session);
+
       return user;
     }
   }
