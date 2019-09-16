@@ -89,7 +89,10 @@ export const resolvers = {
         throw new InvalidLoginError();
       }
 
-      // TODO: check password!!!!!
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) {
+        throw new InvalidLoginError();
+      }
 
       if (!user.confirmed) {
         throw new UnconfirmedUserError();

@@ -1,10 +1,10 @@
 import { createError } from "apollo-errors";
 import {
   mustBeLoggedIn,
-  invalidEmail,
   unknownError,
   unconfirmedUser,
-  emailAlreadyRegistered
+  emailAlreadyRegistered,
+  invalidLogin
 } from "./errorMessages";
 
 export const UnknownError = createError("UnknownError", {
@@ -19,7 +19,7 @@ export const AuthenticationRequiredError = createError(
 );
 
 export const InvalidLoginError = createError("InvalidLoginError", {
-  message: invalidEmail
+  message: invalidLogin
 });
 
 export const UnconfirmedUserError = createError("UnconfirmedUserError", {

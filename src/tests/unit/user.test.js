@@ -9,11 +9,12 @@ import { SECRET, startApplication } from "../../server";
 import {
   unconfirmedUser,
   mustBeLoggedIn,
-  invalidEmail
+  invalidEmail,
+  invalidLogin
 } from "../../validation/errorMessages";
 import { emailService } from "../../services/email/emailService";
 
-describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () => {
+describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
   const registerMutation = (email, password) => `
         mutation {
             register(email: "${email}", password: "${password}") {
@@ -93,7 +94,7 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
 
     expect(result.data.errors).toBeTruthy();
     expect(
-      result.data.errors.some(e => e.message === invalidEmail)
+      result.data.errors.some(e => e.message === invalidLogin)
     ).toBeTruthy();
   });
 
@@ -115,7 +116,7 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
         withCredentials: true
       }
     );
-    console.log(loginResult.data.errors);
+
     expect(loginResult.data.errors).toBeTruthy();
     expect(
       loginResult.data.errors.some(e => e.message === unconfirmedUser)
@@ -166,7 +167,7 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
         withCredentials: true
       }
     );
-    // console.log(loginResult);
+
     expect(loginResult.data).toBeTruthy();
     expect(loginResult.data.data.login).toEqual({
       email: testEmail,
@@ -195,6 +196,27 @@ describe("[UNIT] [ACTION]: Create [SERVICE]: Authentication/Authorization", () =
         id: registerResult.register.id
       }
     });
+  });
+
+  test("login throws error for incorrect password", async () => {
+    const axiosInstance = axios.create({ baseURL: url });
+
+    // create user
+    const registerResult = await request(
+      url,
+      registerMutation(testEmail, testPassword)
+    );
+
+    expect(registerResult.register).toBeTruthy();
+
+    const loginResult = await axiosInstance.post(url, {
+      query: loginMutation(testEmail, "NotTHeRightPassword")
+    });
+
+    expect(loginResult.data.errors).toBeTruthy();
+    expect(
+      loginResult.data.errors.some(e => e.message === invalidLogin)
+    ).toBeTruthy();
   });
 
   test("cannot query me while unauthenticated", async () => {
