@@ -183,6 +183,7 @@ export const resolvers = {
           });
         }
       });
-    }
+    },
+    resetPassword: async (parent, args, context, info) => {}
   }
 };
