@@ -18,7 +18,7 @@ const baseResolver = createResolver(
 );
 
 export const isAuthenticated = baseResolver.createResolver(
-  (parent, args, { session }, info) => {
+  (parent, args, { req: { session } }, info) => {
     if (!session.userId) {
       throw new AuthenticationRequiredError();
     }

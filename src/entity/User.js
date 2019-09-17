@@ -5,7 +5,6 @@ import {
   BeforeInsert,
   BaseEntity
 } from "typeorm";
-import uuidv4 from "uuid/v4";
 
 // If you are using JavaScript instead of TypeScript you must explicitly provide a column type.
 @Entity("users")

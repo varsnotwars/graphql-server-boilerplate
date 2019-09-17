@@ -16,7 +16,7 @@ export class TestClient {
       body: {
         query: `
             mutation login {
-                login (email: "${email}", password: "${password}") {
+                login(email: "${email}", password: "${password}") {
                     id
                     email
                 }
@@ -26,13 +26,13 @@ export class TestClient {
     });
   }
 
-  async logout() {
+  async logout(fromAll) {
     return rp.post(this.url, {
       ...this.options,
       body: {
         query: `
             mutation logout {
-                logout
+                logout(fromAll: ${fromAll})
             }
         `
       }

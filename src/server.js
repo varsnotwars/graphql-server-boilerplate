@@ -1,8 +1,7 @@
 import { createConnection, getConnectionOptions, getConnection } from "typeorm";
 import express from "express";
-import { ApolloServer, gql, sch } from "apollo-server-express";
+import { ApolloServer } from "apollo-server-express";
 import jwt from "jsonwebtoken";
-import * as path from "path";
 import nodemailer from "nodemailer";
 import session from "express-session";
 import cors from "cors";
@@ -39,7 +38,7 @@ export const createApolloServer = () =>
     context: async ({ req }) => {
       return {
         SECRET,
-        session: req ? req.session : null,
+        req,
         origin: req && req.headers ? req.headers.origin : null
       };
     }
@@ -78,6 +77,7 @@ export const startApplication = async () => {
   const app = createExpressApp();
 
   const MySQLStore = connectMysql(session);
+
   const {
     host,
     port,
@@ -85,6 +85,7 @@ export const startApplication = async () => {
     password,
     database
   } = await getConnectionOptions(process.env.NODE_ENV);
+
   const sessionStore = new MySQLStore({
     host,
     port,
@@ -158,9 +159,11 @@ export const startApplication = async () => {
   // set environment graphql path
   environment.graphqlPath = apolloServer.graphqlPath;
 
-  console.log(
-    `🚀 Server ready at ${environment.host}:${environment.port}${apolloServer.graphqlPath}`
-  );
+  if (process.env.NODE_ENV !== "test") {
+    console.log(
+      `🚀 Server ready at ${environment.host}:${environment.port}${apolloServer.graphqlPath}`
+    );
+  }
 
   return {
     expressServer,

@@ -4,7 +4,6 @@ import { SECRET, startApplication } from "../../server";
 import {
   unconfirmedUser,
   mustBeLoggedIn,
-  invalidEmail,
   invalidLogin
 } from "../../validation/errorMessages";
 import { emailService } from "../../services/email/emailService";
@@ -107,7 +106,7 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
     });
   });
 
-  test("can logout user", async () => {
+  test("can logout user from single session", async () => {
     const client = new TestClient(url);
 
     const registerResult = await client.register(testEmail, testPassword);
@@ -143,7 +142,7 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
       }
     });
 
-    const logoutResult = await client.logout();
+    const logoutResult = await client.logout(false);
     expect(logoutResult.data.logout).toBe(true);
 
     const meLoggedOutResult = await client.me();
@@ -151,6 +150,35 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
     expect(
       meLoggedOutResult.errors.some(e => e.message === mustBeLoggedIn)
     ).toBeTruthy();
+  });
+
+  test("can logout user from all sessions", async () => {
+    const session1 = new TestClient(url);
+    const session2 = new TestClient(url);
+
+    const result = await session1.register(testEmail, testPassword);
+    expect(result.data.register).toBeTruthy();
+
+    const { id } = result.data.register;
+    const token = await jwt.sign({ id }, SECRET, { expiresIn: "5m" });
+    const link = emailService.createConfirmationLink(
+      `${environment.host}:${environment.port}`,
+      token
+    );
+    const confirmResult = await session1.httpGet(link);
+    expect(confirmResult).toBe("user has been confirmed");
+
+    await session1.login(testEmail, testPassword);
+    await session2.login(testEmail, testPassword);
+
+    await session1.logout(true);
+
+    const me1 = await session1.me();
+    const me2 = await session2.me();
+
+    expect(me1.errors.some(e => e.message == mustBeLoggedIn)).toEqual(
+      me2.errors.some(e => e.message == mustBeLoggedIn)
+    );
   });
 
   test("login throws error for incorrect password", async () => {
