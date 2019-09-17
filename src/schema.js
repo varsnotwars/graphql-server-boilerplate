@@ -14,5 +14,6 @@ export const typeDefs = gql`
     register(email: String!, password: String!): User!
     login(email: String!, password: String!): User!
     logout(fromAll: Boolean): Boolean!
+    resetPassword: Boolean!
   }
 `;

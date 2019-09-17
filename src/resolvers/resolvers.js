@@ -38,9 +38,9 @@ export const resolvers = {
       } catch (error) {
         throw createFromYupError(error);
       }
-
+      const { email, password } = args;
       const existingUser = await User.findOne({
-        where: { email: args.email },
+        where: { email },
         select: ["id"]
       });
 
@@ -50,11 +50,9 @@ export const resolvers = {
         throw new EmailAlreadyRegisteredError();
       }
 
-      const hashedPassword = await bcrypt.hash(args.password, 10);
-
       const userModel = User.create({
-        email: args.email,
-        password: hashedPassword
+        email,
+        password
       });
 
       const newUser = await userModel.save();
