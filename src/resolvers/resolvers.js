@@ -167,10 +167,17 @@ export const resolvers = {
 
           resolve(true);
         } else {
-          session.destroy(err => {
+          session.destroy(async err => {
             if (err) {
               reject(err);
             } else {
+              const userSession = await conn
+                .createQueryBuilder()
+                .delete()
+                .from(UserSession)
+                .where("session_id = :session_id", { session_id: sessionID })
+                .execute();
+
               resolve(true);
             }
           });
