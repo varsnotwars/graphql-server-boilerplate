@@ -10,7 +10,8 @@ import { isAuthenticated } from "./accessControl";
 import {
   InvalidLoginError,
   UnconfirmedUserError,
-  EmailAlreadyRegisteredError
+  EmailAlreadyRegisteredError,
+  TokenError
 } from "../validation/graphqlErrors";
 import { UserSession } from "../entity/UserSession";
 
@@ -184,51 +185,46 @@ export const resolvers = {
         }
       });
     },
-    resetPassword: async (parent, args, context, info) => {
-      const isValid = await resolvers.Mutation.verifyToken(
-        parent,
-        args,
-        context,
-        info
-      );
-      if (isValid) {
-        const { newPassword, email } = args;
+    resetPassword: async (parent, args, { SECRET }, info) => {
+      let decoded;
+      const { newPassword, token } = args;
 
-        try {
-          // abort early, cleaner to throw one error object instead of trying to parse and throw many errors
-          await userCreationSchema.validate(
-            { email: email, password: newPassword },
-            { abortEarly: true }
-          );
+      try {
+        decoded = jwt.verify(token, SECRET);
+      } catch (error) {
+        console.error(error);
+        throw new TokenError("token not valid");
+      }
 
-          const conn = getConnection("default");
+      const { email } = decoded;
 
-          const user = await conn
-            .createQueryBuilder()
-            .select("user")
-            .from(User, "user")
-            .where("user.email = :email", { email })
-            .getOne();
+      try {
+        await userCreationSchema.validate(
+          { email: email, password: newPassword },
+          { abortEarly: true }
+        );
+      } catch (error) {
+        throw createFromYupError(error);
+      }
 
-          if (!user) {
-            console.error(new Error("user not found"));
-            return false;
-          }
+      const user = await getConnection("default")
+        .createQueryBuilder()
+        .select("user")
+        .from(User, "user")
+        .where("user.email = :email", { email })
+        .getOne();
 
-          user.password = newPassword;
-
-          // update like this to trigger hook
-          await user.save();
-
-          return true;
-        } catch (error) {
-          console.error(error);
-          return false;
-        }
-      } else {
-        console.error(new Error("token not valid"));
+      if (!user) {
+        console.error(new Error("user not found"));
         return false;
       }
+
+      user.password = newPassword;
+
+      // update like this to trigger hook
+      await user.save();
+
+      return true;
     },
     verifyToken: async (parent, { token }, { SECRET }, info) => {
       try {
@@ -240,11 +236,15 @@ export const resolvers = {
       }
     },
     forgotPassword: async (parent, { email }, { SECRET, origin }, info) => {
+      const token = await jwt.sign({ email }, SECRET, {
+        expiresIn: "20m"
+      });
+
       const url = emailService.createResetPasswordLink(origin, token);
       const html = emailService.createResetPasswordEmail(url);
 
       emailService.sendEmail(
-        newUser.email,
+        email,
         process.env.GMAIL_USER,
         "Reset your password",
         html

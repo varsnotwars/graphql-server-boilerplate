@@ -4,7 +4,8 @@ import {
   unknownError,
   unconfirmedUser,
   emailAlreadyRegistered,
-  invalidLogin
+  invalidLogin,
+  invalidToken
 } from "./errorMessages";
 
 export const UnknownError = createError("UnknownError", {
@@ -32,3 +33,7 @@ export const EmailAlreadyRegisteredError = createError(
     message: emailAlreadyRegistered
   }
 );
+
+export const TokenError = createError("TokenError", {
+  message: invalidToken
+});

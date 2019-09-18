@@ -6,3 +6,4 @@ export const unconfirmedUser = "must confirm email";
 export const mustBeLoggedIn = "You must be logged in to do this";
 export const unknownError =
   "An unknown error has occurred. Please try again later";
+export const invalidToken = "Token invalid";
