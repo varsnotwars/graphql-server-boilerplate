@@ -22,7 +22,7 @@
 
 ## TODO:
 
-- implement rate limiting
+- move rate limiting settings to config
 - move orm connection to context
 - close session store cleanly ?
 - cleanup the test file names and folder structures

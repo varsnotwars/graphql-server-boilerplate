@@ -6,10 +6,12 @@ import nodemailer from "nodemailer";
 import session from "express-session";
 import cors from "cors";
 import connectMysql from "express-mysql-session";
+import rateLimit from "express-rate-limit";
 
 import { resolvers } from "./resolvers/resolvers";
 import { typeDefs } from "./schema";
 import { User } from "./entity/User";
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -93,6 +95,16 @@ export const startApplication = async () => {
     password,
     database
   });
+
+  // using the graphql playground will reach lower limits as the playground constantly sends requests
+  if (process.env.NODE_ENV === "production") {
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100 // limit each IP to 100 requests per windowMs
+    });
+
+    app.use(limiter);
+  }
 
   app.use(
     session({
