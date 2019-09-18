@@ -1,10 +1,12 @@
+import jwt from "jsonwebtoken";
 import {
   emailAlreadyRegistered,
   invalidEmail,
   passwordTooShort
 } from "../../validation/errorMessages";
-import { startApplication } from "../../server";
+import { startApplication, SECRET } from "../../server";
 import { TestClient } from "../TestClient";
+import { emailService } from "../../services/email/emailService";
 
 describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
   let expressServer, apolloServer, typeORMConnection, environment, url;
@@ -68,5 +70,38 @@ describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
     expect(
       result.errors.some(e => e.message === passwordTooShort)
     ).toBeTruthy();
+  });
+
+  test("can reset password", async () => {
+    const client = new TestClient(url);
+
+    const result = await client.register(testEmail, testPassword);
+    expect(result.data.register).toBeTruthy();
+
+    const { id } = result.data.register;
+    const { email } = result.data.register;
+
+    const resetToken = await jwt.sign({ email }, SECRET, {
+      expiresIn: "2m"
+    });
+
+    const decoded = jwt.verify(resetToken, SECRET);
+    expect(decoded.email).toEqual(email);
+
+    const newPassword = "new_password";
+    const resetResult = await client.resetPassword(resetToken, newPassword);
+    expect(resetResult.data.resetPassword).toBeTruthy();
+    expect(resetResult.data.resetPassword).toBe(true);
+
+    const token = await jwt.sign({ id }, SECRET, { expiresIn: "5m" });
+    const link = emailService.createConfirmationLink(
+      `${environment.host}:${environment.port}`,
+      token
+    );
+    const confirmResult = await client.httpGet(link);
+    expect(confirmResult).toBe("user has been confirmed");
+
+    const loginResult = await client.login(testEmail, newPassword);
+    expect(loginResult.data.login).toEqual({ id, email });
   });
 });

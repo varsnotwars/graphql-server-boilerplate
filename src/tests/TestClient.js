@@ -71,6 +71,19 @@ export class TestClient {
     });
   }
 
+  async resetPassword(token, newPassword) {
+    return rp.post(this.url, {
+      ...this.options,
+      body: {
+        query: `
+            mutation resetPassword {
+              resetPassword(token: "${token}", newPassword: "${newPassword}")
+            }
+        `
+      }
+    });
+  }
+
   async httpGet(url) {
     return rp.get(url, { json: true });
   }

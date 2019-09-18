@@ -4,6 +4,7 @@
 
 - move orm connection to context
 - close session store cleanly ?
+- cleanup the test fil names and folder structures
 
 ## Note
 
