@@ -16,5 +16,6 @@ export const typeDefs = gql`
     logout(fromAll: Boolean): Boolean!
     resetPassword(token: String!, newPassword: String!): Boolean!
     verifyToken(token: String!): Boolean!
+    forgotPassword(email: String!): Boolean!
   }
 `;

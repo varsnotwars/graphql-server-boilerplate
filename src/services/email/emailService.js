@@ -18,5 +18,7 @@ export const emailService = {
   createResetPasswordLink: (origin, token) =>
     `${origin}/reset-password/${token}`,
   createConfirmEmail: url =>
-    `Please click <a href="${url}">here</a> to confirm email.`
+    `Please click <a href="${url}">here</a> to confirm email.`,
+  createResetPasswordEmail: url =>
+    `Please click <a href="${url}">here</a> to reset your password.`
 };

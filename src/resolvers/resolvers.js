@@ -193,6 +193,7 @@ export const resolvers = {
       );
       if (isValid) {
         const { newPassword, email } = args;
+
         try {
           // abort early, cleaner to throw one error object instead of trying to parse and throw many errors
           await userCreationSchema.validate(
@@ -209,16 +210,24 @@ export const resolvers = {
             .where("user.email = :email", { email })
             .getOne();
 
+          if (!user) {
+            console.error(new Error("user not found"));
+            return false;
+          }
+
           user.password = newPassword;
+
           // update like this to trigger hook
           await user.save();
 
           return true;
         } catch (error) {
-          throw createFromYupError(error);
+          console.error(error);
+          return false;
         }
       } else {
-        // TODO: throw err
+        console.error(new Error("token not valid"));
+        return false;
       }
     },
     verifyToken: async (parent, { token }, { SECRET }, info) => {
@@ -229,6 +238,19 @@ export const resolvers = {
         console.error(error);
         return false;
       }
+    },
+    forgotPassword: async (parent, { email }, { SECRET, origin }, info) => {
+      const url = emailService.createResetPasswordLink(origin, token);
+      const html = emailService.createResetPasswordEmail(url);
+
+      emailService.sendEmail(
+        newUser.email,
+        process.env.GMAIL_USER,
+        "Reset your password",
+        html
+      );
+
+      return true;
     }
   }
 };
