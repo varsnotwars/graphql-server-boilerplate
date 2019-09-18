@@ -1,6 +1,6 @@
 # WORK IN PROGRESS
 
-# graphql-server-boilerplate
+# Graphql Server Boilerplate
 
 ### Features:
 
@@ -11,11 +11,14 @@
 - Forgot password
 - Sessions with cookies
 - Authentication middleware
+- Email sending (user confirmation, password resets)
 
 ### Uses:
 
-- typeorm (no typescript, vanilla javascript)
-- apollo server-express
+- typeorm (vanilla javascript, no typescript)
+- apollo server express
+- mysql integration
+- nodemailer integration
 
 ## TODO:
 
