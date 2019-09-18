@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   BeforeInsert,
+  BeforeUpdate,
   BaseEntity
 } from "typeorm";
 import bcrypt from "bcryptjs";
@@ -23,6 +24,11 @@ export class User extends BaseEntity {
 
   @BeforeInsert()
   async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+
+  @BeforeUpdate()
+  async hashNewPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }
 }

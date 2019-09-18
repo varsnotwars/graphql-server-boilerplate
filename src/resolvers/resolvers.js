@@ -55,7 +55,9 @@ export const resolvers = {
         password
       });
 
+      // save using model, not QB, to trigger hooks
       const newUser = await userModel.save();
+
       if (process.env.NODE_ENV !== "test") {
         const token = await jwt.sign({ id: newUser.id }, SECRET, {
           expiresIn: "1d"
@@ -182,6 +184,51 @@ export const resolvers = {
         }
       });
     },
-    resetPassword: async (parent, args, context, info) => {}
+    resetPassword: async (parent, args, context, info) => {
+      const isValid = await resolvers.Mutation.verifyToken(
+        parent,
+        args,
+        context,
+        info
+      );
+      if (isValid) {
+        const { newPassword, email } = args;
+        try {
+          // abort early, cleaner to throw one error object instead of trying to parse and throw many errors
+          await userCreationSchema.validate(
+            { email: email, password: newPassword },
+            { abortEarly: true }
+          );
+
+          const conn = getConnection("default");
+
+          const user = await conn
+            .createQueryBuilder()
+            .select("user")
+            .from(User, "user")
+            .where("user.email = :email", { email })
+            .getOne();
+
+          user.password = newPassword;
+          // update like this to trigger hook
+          await user.save();
+
+          return true;
+        } catch (error) {
+          throw createFromYupError(error);
+        }
+      } else {
+        // TODO: throw err
+      }
+    },
+    verifyToken: async (parent, { token }, { SECRET }, info) => {
+      try {
+        jwt.verify(token, SECRET);
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    }
   }
 };
