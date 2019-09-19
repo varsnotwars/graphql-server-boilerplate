@@ -3,7 +3,7 @@ import { getConnection } from "typeorm";
 import { TokenError } from "../errors/graphqlErrors";
 import { userCreationSchema } from "../validation/userCreationSchema";
 import { createFromYupError } from "../utils/createFromYupError";
-import { emailService } from "../services/email/emailService";
+import { emailService } from "../services/emailService";
 import { User } from "../entity/User";
 
 export const Query = {};

@@ -6,7 +6,7 @@ import {
 } from "../../errors/errorMessages";
 import { startApplication, SECRET } from "../../server";
 import { TestClient } from "../TestClient";
-import { emailService } from "../../services/email/emailService";
+import { emailService } from "../../services/emailService";
 
 describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
   let expressServer, apolloServer, typeORMConnection, environment, url;

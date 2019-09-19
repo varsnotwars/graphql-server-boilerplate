@@ -6,7 +6,7 @@ import {
   mustBeLoggedIn,
   invalidLogin
 } from "../../errors/errorMessages";
-import { emailService } from "../../services/email/emailService";
+import { emailService } from "../../services/emailService";
 import { TestClient } from "../TestClient";
 
 describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {

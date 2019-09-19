@@ -1,4 +1,4 @@
-import { transporter } from "../../server";
+import { transporter } from "../server";
 
 export const emailService = {
   sendEmail: async (to, from, subject, html) => {

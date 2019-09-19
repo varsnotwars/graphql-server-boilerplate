@@ -5,7 +5,7 @@ import { EmailAlreadyRegisteredError } from "../errors/graphqlErrors";
 import { userCreationSchema } from "../validation/userCreationSchema";
 import { User } from "../entity/User";
 import { createFromYupError } from "../utils/createFromYupError";
-import { emailService } from "../services/email/emailService";
+import { emailService } from "../services/emailService";
 import { isAuthenticated } from "../middleware/isAuthenticated";
 
 export const Query = {

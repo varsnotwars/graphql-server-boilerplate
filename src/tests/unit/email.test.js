@@ -1,4 +1,4 @@
-import { emailService } from "../../services/email/emailService";
+import { emailService } from "../../services/emailService";
 import jwt from "jsonwebtoken";
 import { v4 } from "uuid";
 import { SECRET } from "../../server";
