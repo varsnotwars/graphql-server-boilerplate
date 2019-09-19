@@ -2,6 +2,8 @@
 
 # Graphql Server Boilerplate
 
+[![Coverage Status](https://coveralls.io/repos/github/varsnotwars/graphql-server-boilerplate/badge.svg?branch=master)](https://coveralls.io/github/varsnotwars/graphql-server-boilerplate?branch=master)
+
 ### Features:
 
 - Signup
