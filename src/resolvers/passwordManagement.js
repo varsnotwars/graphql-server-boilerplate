@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import { getConnection } from "typeorm";
-import { TokenError } from "../validation/graphqlErrors";
-import { userCreationSchema } from "../validation/validationSchemas";
-import { createFromYupError } from "../validation/formatters";
+import { TokenError } from "../errors/graphqlErrors";
+import { userCreationSchema } from "../validation/userCreationSchema";
+import { createFromYupError } from "../utils/createFromYupError";
 import { emailService } from "../services/email/emailService";
 import { User } from "../entity/User";
 

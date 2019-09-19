@@ -1,12 +1,12 @@
 import { getConnection } from "typeorm";
 import jwt from "jsonwebtoken";
 
-import { EmailAlreadyRegisteredError } from "../validation/graphqlErrors";
-import { userCreationSchema } from "../validation/validationSchemas";
+import { EmailAlreadyRegisteredError } from "../errors/graphqlErrors";
+import { userCreationSchema } from "../validation/userCreationSchema";
 import { User } from "../entity/User";
-import { createFromYupError } from "../validation/formatters";
+import { createFromYupError } from "../utils/createFromYupError";
 import { emailService } from "../services/email/emailService";
-import { isAuthenticated } from "./utils/accessControl";
+import { isAuthenticated } from "../middleware/isAuthenticated";
 
 export const Query = {
   me: isAuthenticated.createResolver(async (parent, args, { req }, info) => {

@@ -3,7 +3,7 @@ import {
   emailAlreadyRegistered,
   invalidEmail,
   passwordTooShort
-} from "../../validation/errorMessages";
+} from "../../errors/errorMessages";
 import { startApplication, SECRET } from "../../server";
 import { TestClient } from "../TestClient";
 import { emailService } from "../../services/email/emailService";

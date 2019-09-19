@@ -149,7 +149,7 @@ export const startApplication = async () => {
 
         if (user) {
           if (user.confirmed) {
-            // cannot invalidated jwt, they must expire
+            // cannot invalidate jwt, they must expire
 
             res.send("already confirmed");
           } else {

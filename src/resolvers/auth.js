@@ -4,7 +4,7 @@ import { getConnection } from "typeorm";
 import {
   InvalidLoginError,
   UnconfirmedUserError
-} from "../validation/graphqlErrors";
+} from "../errors/graphqlErrors";
 import { UserSession } from "../entity/UserSession";
 import { Session } from "../entity/Session";
 import { User } from "../entity/User";

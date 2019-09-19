@@ -1,5 +1,5 @@
 import * as yup from "yup";
-import { passwordTooShort, invalidEmail } from "./errorMessages";
+import { passwordTooShort, invalidEmail } from "../errors/errorMessages";
 
 // use const error messages we define so we can test against them, don't depend on yups' errors
 export const userCreationSchema = yup.object().shape({

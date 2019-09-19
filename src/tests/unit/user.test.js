@@ -5,7 +5,7 @@ import {
   unconfirmedUser,
   mustBeLoggedIn,
   invalidLogin
-} from "../../validation/errorMessages";
+} from "../../errors/errorMessages";
 import { emailService } from "../../services/email/emailService";
 import { TestClient } from "../TestClient";
 

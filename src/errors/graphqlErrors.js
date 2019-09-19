@@ -4,8 +4,8 @@ import {
   unknownError,
   unconfirmedUser,
   emailAlreadyRegistered,
-  invalidLogin,
-  invalidToken
+  invalidToken,
+  invalidLogin
 } from "./errorMessages";
 
 export const UnknownError = createError("UnknownError", {
