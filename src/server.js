@@ -8,8 +8,9 @@ import cors from "cors";
 import connectMysql from "express-mysql-session";
 import rateLimit from "express-rate-limit";
 
-import { resolvers } from "./resolvers/resolvers";
+import { resolvers } from "./resolvers";
 import { typeDefs } from "./schema";
+
 import { User } from "./entity/User";
 
 import dotenv from "dotenv";
@@ -69,7 +70,11 @@ export const startApplication = async () => {
       host: "http://localhost",
       graphqlPath: ""
     },
-    production: {}
+    production: {
+      port: "",
+      host: "",
+      graphqlPath: ""
+    }
   };
 
   const environment = envConfig[process.env.NODE_env];

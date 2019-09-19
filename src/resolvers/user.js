@@ -1,0 +1,72 @@
+import { getConnection } from "typeorm";
+import jwt from "jsonwebtoken";
+
+import { EmailAlreadyRegisteredError } from "../validation/graphqlErrors";
+import { userCreationSchema } from "../validation/validationSchemas";
+import { User } from "../entity/User";
+import { createFromYupError } from "../validation/formatters";
+import { emailService } from "../services/email/emailService";
+import { isAuthenticated } from "./utils/accessControl";
+
+export const Query = {
+  me: isAuthenticated.createResolver(async (parent, args, { req }, info) => {
+    const conn = getConnection("default");
+    const { session } = req;
+
+    const user = await conn
+      .createQueryBuilder()
+      .select("user")
+      .from(User, "user")
+      .where("user.id = :id", { id: session.userId })
+      .getOne();
+
+    return user;
+  })
+};
+export const Mutation = {
+  register: async (parent, args, { SECRET, origin }, info) => {
+    try {
+      // abort early, cleaner to throw one error object instead of trying to parse and throw many errors
+      await userCreationSchema.validate(args, { abortEarly: true });
+    } catch (error) {
+      throw createFromYupError(error);
+    }
+    const { email, password } = args;
+    const existingUser = await User.findOne({
+      where: { email },
+      select: ["id"]
+    });
+
+    // manually check like this, instead of adding the constraint at the db level
+    // so we can add registration by phone number later, where email could be null
+    if (existingUser) {
+      throw new EmailAlreadyRegisteredError();
+    }
+
+    const userModel = User.create({
+      email,
+      password
+    });
+
+    // save using model, not QB, to trigger hooks
+    const newUser = await userModel.save();
+
+    if (process.env.NODE_ENV !== "test") {
+      const token = await jwt.sign({ id: newUser.id }, SECRET, {
+        expiresIn: "1d"
+      });
+
+      const url = emailService.createConfirmationLink(origin, token);
+      const html = emailService.createConfirmEmail(url);
+
+      emailService.sendEmail(
+        newUser.email,
+        process.env.GMAIL_USER,
+        "Confirm your email",
+        html
+      );
+    }
+
+    return newUser;
+  }
+};

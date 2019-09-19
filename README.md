@@ -27,8 +27,10 @@
 - close session store cleanly ?
 - cleanup the test file names and folder structures
 - general code cleanup
+- put expect res.errors toBeFalsy checks before all res.data.resolverName checks
 
 ## Note
 
 - Tests must be run sequentially `--runInBand` flag is passed into jest, see package.json
 - NODE_ENV uses windows syntax of `SET`
+- Must explicitly provide a column type to typeorm

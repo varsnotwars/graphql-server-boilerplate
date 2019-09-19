@@ -1,9 +1,9 @@
 import { createResolver } from "apollo-resolvers";
 import { isInstance } from "apollo-errors";
 import {
-  UnknownError,
-  AuthenticationRequiredError
-} from "../validation/graphqlErrors";
+  AuthenticationRequiredError,
+  UnknownError
+} from "../../validation/graphqlErrors";
 
 const baseResolver = createResolver(
   //incoming requests will pass through this resolver like a no-op

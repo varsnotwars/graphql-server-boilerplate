@@ -7,7 +7,6 @@ import {
   BaseEntity
 } from "typeorm";
 import bcrypt from "bcryptjs";
-// If you are using JavaScript instead of TypeScript you must explicitly provide a column type.
 @Entity("users")
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
