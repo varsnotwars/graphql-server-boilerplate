@@ -13,7 +13,7 @@ os:
   - linux
 
 before_install:
-  - mysql -e 'CREATE DATABASE graphql_server_boilerplate;'
+  - mysql -e 'CREATE DATABASE graphql_server_boilerplate_test;'
 
 install:
   - npm install
