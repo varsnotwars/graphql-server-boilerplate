@@ -10,6 +10,3 @@ os:
 install:
   - npm install
   - npm start
-
-script:
-  - npm test
