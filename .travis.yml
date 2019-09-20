@@ -10,9 +10,7 @@ services:
 os:
   - windows
 
-before_install:
-  - mysql -e 'CREATE DATABASE IF NOT EXISTS graphql_server_boilerplate;'
-
 install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS graphql_server_boilerplate;'
   - npm install
   - npm start
