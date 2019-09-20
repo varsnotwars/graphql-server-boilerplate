@@ -6,7 +6,7 @@
   "scripts": {
     "test": "SET NODE_ENV=test&& babel src --out-dir dist && jest --runInBand --verbose --forceExit",
     "start": "SET NODE_ENV=development&& babel src --out-dir dist && node dist/index.js",
-    "ci": "NODE_ENV=test&& babel src --out-dir dist && jest --runInBand --verbose --forceExit",
+    "ci": "NODE_ENV=test&& babel src --out-dir dist && jest --runInBand --verbose --forceExit --coverage --coverageReporters=text-lcov | coveralls ",
     "server": "NODE_ENV=development&& babel src --out-dir dist && node dist/index.js"
   },
   "jest": {
@@ -32,6 +32,7 @@
     "@babel/preset-env": "^7.6.0",
     "@babel/preset-es2015": "^7.0.0-beta.53",
     "@babel/register": "^7.6.0",
+    "coveralls": "^3.0.6",
     "jest": "^24.9.0"
   },
   "dependencies": {
