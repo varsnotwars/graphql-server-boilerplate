@@ -77,7 +77,7 @@ export const startApplication = async () => {
     }
   };
 
-  const environment = envConfig[process.env.NODE_env];
+  const environment = envConfig[process.env.NODE_ENV];
 
   const apolloServer = createApolloServer();
   const typeORMConnection = await createOrmConnection();
