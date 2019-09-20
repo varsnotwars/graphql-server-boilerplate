@@ -7,7 +7,7 @@
     "test": "SET NODE_ENV=test&& babel src --out-dir dist && jest --runInBand --verbose --forceExit",
     "start": "SET NODE_ENV=development&& babel src --out-dir dist && node dist/index.js",
     "ci": "NODE_ENV=test&& babel src --out-dir dist && jest --runInBand --verbose --forceExit",
-    "buid": "NODE_ENV=development&& babel src --out-dir dist && node dist/index.js"
+    "server": "NODE_ENV=development&& babel src --out-dir dist && node dist/index.js"
   },
   "jest": {
     "testPathIgnorePatterns": [

@@ -14,7 +14,7 @@ os:
 
 install:
   - npm install
-  - npm build
+  - npm run server
 
 script:
-  - npm ci
+  - npm run ci
