@@ -2,18 +2,18 @@
 
 # Graphql Server Boilerplate
 
-| Code Coverage              | Build Status            | License                   | Code Quality              |
-| :------------------------- | :---------------------- | :------------------------ | :------------------------ |
-| [![Coverage Status][1]][2] | [![Build Status][3]][4] | [![GitHub license][5]][6] | [![GitHub license][7]][8] |
+| Build Status            | Code Coverage            | Code Quality            | License            |
+| :---------------------- | :----------------------- | :---------------------- | :----------------- |
+| [![Build Status][1]][2] | [![Code Coverage][3]][4] | [![Code Quality][5]][6] | [![License][7]][8] |
 
-[1]: https://coveralls.io/repos/github/varsnotwars/graphql-server-boilerplate/badge.svg?branch=master
-[2]: https://coveralls.io/github/varsnotwars/graphql-server-boilerplate?branch=master
-[3]: https://travis-ci.org/varsnotwars/graphql-server-boilerplate.svg?branch=master
-[4]: https://travis-ci.org/varsnotwars/graphql-server-boilerplate
-[5]: https://img.shields.io/badge/License-MIT-yellow.svg
-[6]: https://github.com/varsnotwars/graphql-server-boilerplate/blob/master/LICENSE.md
-[7]: https://www.codefactor.io/repository/github/varsnotwars/graphql-server-boilerplate/badge
-[8]: https://www.codefactor.io/repository/github/varsnotwars/graphql-server-boilerplate
+[1]: https://travis-ci.org/varsnotwars/graphql-server-boilerplate.svg?branch=master
+[2]: https://travis-ci.org/varsnotwars/graphql-server-boilerplate
+[3]: https://coveralls.io/repos/github/varsnotwars/graphql-server-boilerplate/badge.svg?branch=master
+[4]: https://coveralls.io/github/varsnotwars/graphql-server-boilerplate?branch=master
+[5]: https://www.codefactor.io/repository/github/varsnotwars/graphql-server-boilerplate/badge
+[6]: https://www.codefactor.io/repository/github/varsnotwars/graphql-server-boilerplate
+[7]: https://img.shields.io/badge/License-MIT-yellow.svg
+[8]: https://github.com/varsnotwars/graphql-server-boilerplate/blob/master/LICENSE.md
 
 ### Features:
 
