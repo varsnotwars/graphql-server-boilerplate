@@ -14,4 +14,7 @@ os:
 
 install:
   - npm install
-  - npm start
+  - npm build
+
+script:
+  - npm ci
