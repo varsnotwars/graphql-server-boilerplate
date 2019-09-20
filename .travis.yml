@@ -12,6 +12,9 @@ services:
 os:
   - linux
 
+before_install:
+  - mysql -e 'CREATE DATABASE graphql_server_boilerplate;'
+
 install:
   - npm install
   - npm run server
