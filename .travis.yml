@@ -1,13 +1,16 @@
+dist: xenial
+
 language: node_js
 node_js: "node"
 cache:
   directories:
     - "node_modules"
 
-services: mysql
+services:
+  - mysql
 
 os:
-  - windows
+  - linux
 
 install:
   - npm install
