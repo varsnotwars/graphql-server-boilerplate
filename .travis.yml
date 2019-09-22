@@ -1,23 +1,20 @@
 dist: xenial
-
 language: node_js
-node_js: "node"
+node_js: node
 cache:
   directories:
-    - "node_modules"
-
+    - node_modules
 services:
   - mysql
-
 os:
   - linux
-
 before_install:
   - mysql -e 'CREATE DATABASE graphql_server_boilerplate_test;'
-
 install:
   - npm install
   - npm run server
-
 script:
   - npm run ci
+notifications:
+  slack:
+    secure: AIfG4ZHIv5ZFgml789h3sPG3Uh2XX0ByzNZq0jFCZqRAF265mC2il7x56mvBYM+Nm+L8X6fnvIaYzvIBAX0O4GWLMRdi+347JYXsGLiLemH0RRNUrKQWn9REelmhelA/p+f6t1zcqswdOgf7oAwGXpcFlAwMeizDwQW7N7Jb5HUd921CdflQnSAIX6QetItGa2CoKr34o4dGHeOCz/9fQz9bSkLys7GqqzZBg/veHeDbZ1VHDZQj8V2uQ89hwxo26sOHxxV8eLxjDAgh1D+7ALuiCZ59JanGBz25x1ssTxb4Hu6+2BVZyl2E7o+oC515D9nPEbXwpliNsVlec9bTbyShK+Jfq2e1tfMessW7Mkq827LxV6hFDjGh/Ghn0TXG1D2QMVfiW/b0B/TkIUGQLGnwox+gibF+GVeyfzjfqgrbW3OYT4gGel0eSl6kw7OPcXadpYX0NF67u0wOtqf0xASOYIX2Yqc9BFlZWWUgBRJ9w5jc6lvIA0jxAjDnZ1Wd0lY7uRCeqEzoVUbig4y59EemzPcgZpFYXx/NsAlBDFv1qjHmRiI23WooCZPEp59jv6TPGKjuh5Cmngj2WpAowqY0MvUjLdvLqbedGrl4aob6UFBg/Uk9Qbxu6JuCybgsuVXS1/gzj9akIMCqHFQ4CRIxWUDIb6WdOvAveHugV0M=
