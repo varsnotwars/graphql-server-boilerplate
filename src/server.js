@@ -13,6 +13,8 @@ import { typeDefs } from "./schema";
 
 import { User } from "./entity/User";
 
+import { environment as envConfig } from "./config/environment";
+const environment = envConfig[process.env.NODE_ENV];
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -59,26 +61,6 @@ export const getOrmConnection = connName => getConnection(connName);
 export const createExpressApp = () => express();
 
 export const startApplication = async () => {
-  const envConfig = {
-    test: {
-      port: 4000,
-      host: "http://localhost",
-      graphqlPath: ""
-    },
-    development: {
-      port: 4000,
-      host: "http://localhost",
-      graphqlPath: ""
-    },
-    production: {
-      port: "",
-      host: "",
-      graphqlPath: ""
-    }
-  };
-
-  const environment = envConfig[process.env.NODE_ENV];
-
   const apolloServer = createApolloServer();
   const typeORMConnection = await createOrmConnection();
   const app = createExpressApp();
@@ -154,7 +136,7 @@ export const startApplication = async () => {
             res.send("already confirmed");
           } else {
             // QueryBuilder is most performant
-            const updateRes = await typeORMConnection
+            await typeORMConnection
               .createQueryBuilder()
               .update(User)
               .set({ confirmed: true })
@@ -170,11 +152,9 @@ export const startApplication = async () => {
     });
   });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, path: environment.graphqlPath });
 
   const expressServer = await app.listen({ port: environment.port });
-  // set environment graphql path
-  environment.graphqlPath = apolloServer.graphqlPath;
 
   if (process.env.NODE_ENV !== "test") {
     console.log(
