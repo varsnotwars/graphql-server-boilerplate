@@ -4,7 +4,6 @@ import { ApolloServer } from "apollo-server-express";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import session from "express-session";
-import cors from "cors";
 import connectMysql from "express-mysql-session";
 import rateLimit from "express-rate-limit";
 
@@ -108,14 +107,6 @@ export const startApplication = async () => {
     })
   );
 
-  app.use(
-    cors({
-      origin: "*",
-      methods: ["GET", "POST"],
-      credentials: true // enable set cookie
-    })
-  );
-
   app.get("/confirm/:token", async (req, res) => {
     const { token } = req.params;
 
@@ -152,7 +143,14 @@ export const startApplication = async () => {
     });
   });
 
-  apolloServer.applyMiddleware({ app, path: environment.graphqlPath });
+  apolloServer.applyMiddleware({
+    app: app,
+    path: environment.graphqlPath,
+    cors: {
+      origin: environment.origin,
+      credentials: true // enable set cookie
+    }
+  });
 
   const expressServer = await app.listen({ port: environment.port });
 
