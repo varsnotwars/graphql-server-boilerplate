@@ -39,13 +39,13 @@ export class TestClient {
     });
   }
 
-  async me() {
+  async profile() {
     return rp.post(this.url, {
       ...this.options,
       body: {
         query: `
-            query me {
-                me {
+            query profile {
+                profile {
                     id
                     email
                 }

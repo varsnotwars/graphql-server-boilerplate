@@ -9,19 +9,21 @@ import { emailService } from "../services/emailService";
 import { isAuthenticated } from "../middleware/isAuthenticated";
 
 export const Query = {
-  me: isAuthenticated.createResolver(async (parent, args, { req }, info) => {
-    const conn = getConnection("default");
-    const { session } = req;
+  profile: isAuthenticated.createResolver(
+    async (parent, args, { req }, info) => {
+      const conn = getConnection("default");
+      const { session } = req;
 
-    const user = await conn
-      .createQueryBuilder()
-      .select("user")
-      .from(User, "user")
-      .where("user.id = :id", { id: session.userId })
-      .getOne();
+      const user = await conn
+        .createQueryBuilder()
+        .select("user")
+        .from(User, "user")
+        .where("user.id = :id", { id: session.userId })
+        .getOne();
 
-    return user;
-  })
+      return user;
+    }
+  )
 };
 export const Mutation = {
   register: async (parent, args, { SECRET, origin }, info) => {

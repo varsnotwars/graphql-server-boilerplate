@@ -97,12 +97,10 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
       }
     });
 
-    const meResult = await client.me();
-    expect(meResult.data).toEqual({
-      me: {
-        email: testEmail,
-        id: id
-      }
+    const meResult = await client.profile();
+    expect(meResult.data.profile).toEqual({
+      email: testEmail,
+      id: id
     });
   });
 
@@ -134,18 +132,16 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
       }
     });
 
-    const meResult = await client.me();
-    expect(meResult.data).toEqual({
-      me: {
-        email: testEmail,
-        id: id
-      }
+    const meResult = await client.profile();
+    expect(meResult.data.profile).toEqual({
+      email: testEmail,
+      id: id
     });
 
     const logoutResult = await client.logout(false);
     expect(logoutResult.data.logout).toBe(true);
 
-    const meLoggedOutResult = await client.me();
+    const meLoggedOutResult = await client.profile();
     expect(meLoggedOutResult.errors).toBeTruthy();
     expect(
       meLoggedOutResult.errors.some(e => e.message === mustBeLoggedIn)
@@ -173,8 +169,8 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
 
     await session1.logout(true);
 
-    const me1 = await session1.me();
-    const me2 = await session2.me();
+    const me1 = await session1.profile();
+    const me2 = await session2.profile();
 
     expect(me1.errors.some(e => e.message == mustBeLoggedIn)).toEqual(
       me2.errors.some(e => e.message == mustBeLoggedIn)
@@ -199,7 +195,7 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
 
   test("cannot query me while unauthenticated", async () => {
     const client = new TestClient(url);
-    const result = await client.me();
+    const result = await client.profile();
 
     expect(result.errors).toBeTruthy();
     expect(result.errors.some(e => e.message === mustBeLoggedIn)).toBeTruthy();
