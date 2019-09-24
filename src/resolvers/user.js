@@ -9,24 +9,22 @@ import { emailService } from "../services/emailService";
 import { isAuthenticated } from "../middleware/isAuthenticated";
 
 export const Query = {
-  profile: isAuthenticated.createResolver(
-    async (parent, args, { req }, info) => {
-      const conn = getConnection("default");
-      const { session } = req;
+  profile: isAuthenticated.createResolver(async (parent, args, { req }) => {
+    const conn = getConnection("default");
+    const { session } = req;
 
-      const user = await conn
-        .createQueryBuilder()
-        .select("user")
-        .from(User, "user")
-        .where("user.id = :id", { id: session.userId })
-        .getOne();
+    const user = await conn
+      .createQueryBuilder()
+      .select("user")
+      .from(User, "user")
+      .where("user.id = :id", { id: session.userId })
+      .getOne();
 
-      return user;
-    }
-  )
+    return user;
+  })
 };
 export const Mutation = {
-  register: async (parent, args, { SECRET, origin }, info) => {
+  register: async (parent, args, { SECRET, origin }) => {
     try {
       // abort early, cleaner to throw one error object instead of trying to parse and throw many errors
       await userCreationSchema.validate(args, { abortEarly: true });

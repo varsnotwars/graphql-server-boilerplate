@@ -15,6 +15,38 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
   const testEmail = "test@test.com";
   const testPassword = "password";
 
+  const canGetLoggedInUser = async client => {
+    const registerResult = await client.register(testEmail, testPassword);
+
+    expect(registerResult.data.register).toBeTruthy();
+    const { id } = registerResult.data.register;
+
+    const token = await jwt.sign({ id }, SECRET, { expiresIn: "5m" });
+
+    const link = emailService.createConfirmationLink(
+      `${environment.host}:${environment.port}`,
+      token
+    );
+
+    const confirmResult = await client.httpGet(link);
+
+    expect(confirmResult).toBe("user has been confirmed");
+
+    const loginResult = await client.login(testEmail, testPassword);
+    expect(loginResult.data).toBeTruthy();
+    expect(loginResult.data).toEqual({
+      login: {
+        email: testEmail,
+        id: id
+      }
+    });
+
+    const meResult = await client.profile();
+    expect(meResult.data.profile).toEqual({
+      email: testEmail,
+      id: id
+    });
+  };
   beforeEach(async () => {
     const app = await startApplication();
 
@@ -70,73 +102,12 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
   });
 
   test("can get logged in user", async () => {
-    const client = new TestClient(url);
-
-    const registerResult = await client.register(testEmail, testPassword);
-
-    expect(registerResult.data.register).toBeTruthy();
-    const { id } = registerResult.data.register;
-
-    const token = await jwt.sign({ id }, SECRET, { expiresIn: "5m" });
-
-    const link = emailService.createConfirmationLink(
-      `${environment.host}:${environment.port}`,
-      token
-    );
-
-    const confirmResult = await client.httpGet(link);
-
-    expect(confirmResult).toBe("user has been confirmed");
-
-    const loginResult = await client.login(testEmail, testPassword);
-    expect(loginResult.data).toBeTruthy();
-    expect(loginResult.data).toEqual({
-      login: {
-        email: testEmail,
-        id: id
-      }
-    });
-
-    const meResult = await client.profile();
-    expect(meResult.data.profile).toEqual({
-      email: testEmail,
-      id: id
-    });
+    await canGetLoggedInUser(new TestClient(url));
   });
 
   test("can logout user from single session", async () => {
     const client = new TestClient(url);
-
-    const registerResult = await client.register(testEmail, testPassword);
-
-    expect(registerResult.data.register).toBeTruthy();
-    const { id } = registerResult.data.register;
-
-    const token = await jwt.sign({ id }, SECRET, { expiresIn: "5m" });
-
-    const link = emailService.createConfirmationLink(
-      `${environment.host}:${environment.port}`,
-      token
-    );
-
-    const confirmResult = await client.httpGet(link);
-
-    expect(confirmResult).toBe("user has been confirmed");
-
-    const loginResult = await client.login(testEmail, testPassword);
-    expect(loginResult.data).toBeTruthy();
-    expect(loginResult.data).toEqual({
-      login: {
-        email: testEmail,
-        id: id
-      }
-    });
-
-    const meResult = await client.profile();
-    expect(meResult.data.profile).toEqual({
-      email: testEmail,
-      id: id
-    });
+    await canGetLoggedInUser(client);
 
     const logoutResult = await client.logout(false);
     expect(logoutResult.data.logout).toBe(true);
