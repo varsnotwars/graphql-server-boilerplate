@@ -15,7 +15,6 @@ export const Mutation = {
     try {
       decoded = jwt.verify(token, SECRET);
     } catch (error) {
-      console.error(error);
       throw new TokenError("token not valid");
     }
 
@@ -50,7 +49,7 @@ export const Mutation = {
     return true;
   },
   forgotPassword: async (parent, { email }, { SECRET, origin }, info) => {
-    const token = await jwt.sign({ email }, SECRET, {
+    const token = jwt.sign({ email }, SECRET, {
       expiresIn: "20m"
     });
 
