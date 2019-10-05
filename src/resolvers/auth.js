@@ -81,7 +81,7 @@ export const Mutation = {
           .where("user_id = :user_id", { user_id })
           .getMany();
 
-        const deleteResult = await conn
+        await conn
           .createQueryBuilder()
           .delete()
           .from(Session)
@@ -91,7 +91,7 @@ export const Mutation = {
           .execute();
 
         // TODO: setup cascade to do this query
-        const delRes = await conn
+        await conn
           .createQueryBuilder()
           .delete()
           .from(UserSession)
@@ -106,7 +106,7 @@ export const Mutation = {
           if (err) {
             reject(err);
           } else {
-            const userSession = await conn
+            await conn
               .createQueryBuilder()
               .delete()
               .from(UserSession)
