@@ -47,3 +47,5 @@
 - Tests must be run sequentially `--runInBand` flag is passed into jest, see package.json
 - NODE_ENV uses windows syntax of `SET`
 - Must explicitly provide a column type to typeorm
+- MYSQL 8 not supported by `mysql` dependency, run the following command to fix `ER_NOT_SUPPORTED_AUTH_MODE` error:
+  `ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'`
