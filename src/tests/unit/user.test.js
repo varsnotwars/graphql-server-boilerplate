@@ -30,7 +30,7 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
 
     const confirmResult = await client.httpGet(link);
 
-    expect(confirmResult).toBe("user has been confirmed");
+    expect(confirmResult).toBe(true);
 
     const loginResult = await client.login(testEmail, testPassword);
     expect(loginResult.data).toBeTruthy();
@@ -133,7 +133,7 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
       token
     );
     const confirmResult = await session1.httpGet(link);
-    expect(confirmResult).toBe("user has been confirmed");
+    expect(confirmResult).toBe(true);
 
     await session1.login(testEmail, testPassword);
     await session2.login(testEmail, testPassword);

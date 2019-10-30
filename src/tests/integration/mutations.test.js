@@ -99,7 +99,7 @@ describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
       token
     );
     const confirmResult = await client.httpGet(link);
-    expect(confirmResult).toBe("user has been confirmed");
+    expect(confirmResult).toBe(true);
 
     const loginResult = await client.login(testEmail, newPassword);
     expect(loginResult.data.login).toEqual({ id, email });
