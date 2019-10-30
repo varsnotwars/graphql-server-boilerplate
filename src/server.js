@@ -112,7 +112,7 @@ export const startApplication = async () => {
 
     jwt.verify(token, SECRET, async (err, decoded) => {
       if (err) {
-        res.send(err);
+        res.send(false);
       } else {
         const { id } = decoded;
         const user = await User.findOne({
@@ -124,7 +124,8 @@ export const startApplication = async () => {
           if (user.confirmed) {
             // cannot invalidate jwt, they must expire
 
-            res.send("already confirmed");
+            console.log("already confirmed");
+            res.send(true);
           } else {
             // QueryBuilder is most performant
             await typeORMConnection
@@ -134,10 +135,11 @@ export const startApplication = async () => {
               .where("id = :id", { id })
               .execute();
 
-            res.send("user has been confirmed");
+            res.send(true);
           }
         } else {
-          res.send("user not found");
+          console.log("user not found");
+          res.send(false);
         }
       }
     });
