@@ -3,7 +3,7 @@ import { Query as authQueries, Mutation as authMutations } from "./auth";
 import {
   Query as passwordQueries,
   Mutation as passwordMutations
-} from "./passwordManagement";
+} from "./accountManagement";
 
 export const resolvers = {
   Query: {
