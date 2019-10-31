@@ -8,7 +8,7 @@ import { User } from "../entity/User";
 
 export const Query = {};
 export const Mutation = {
-  resetPassword: async (parent, args, { SECRET }, info) => {
+  resetPassword: async (parent, args, { SECRET }) => {
     let decoded;
     const { newPassword, token } = args;
 
@@ -48,7 +48,7 @@ export const Mutation = {
 
     return true;
   },
-  forgotPassword: async (parent, { email }, { SECRET, origin }, info) => {
+  forgotPassword: async (parent, { email }, { SECRET, origin }) => {
     const token = jwt.sign({ email }, SECRET, {
       expiresIn: "20m"
     });
@@ -65,7 +65,7 @@ export const Mutation = {
 
     return true;
   },
-  verifyToken: async (parent, { token }, { SECRET }, info) => {
+  verifyToken: async (parent, { token }, { SECRET }) => {
     try {
       jwt.verify(token, SECRET);
       return true;
@@ -74,7 +74,7 @@ export const Mutation = {
       return false;
     }
   },
-  confirmAccount: async (parent, { token }, { SECRET }, info) => {
+  confirmAccount: async (parent, { token }, { SECRET }) => {
     try {
       const { id } = jwt.verify(token, SECRET);
 
