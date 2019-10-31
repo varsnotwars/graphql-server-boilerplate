@@ -1,7 +1,6 @@
 import { createConnection, getConnectionOptions, getConnection } from "typeorm";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
-import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import session from "express-session";
 import connectMysql from "express-mysql-session";
@@ -9,8 +8,6 @@ import rateLimit from "express-rate-limit";
 
 import { resolvers } from "./resolvers";
 import { typeDefs } from "./schema";
-
-import { User } from "./entity/User";
 
 import { environment as envConfig } from "./config/environment";
 const environment = envConfig[process.env.NODE_ENV];
@@ -107,44 +104,6 @@ export const startApplication = async () => {
     })
   );
 
-  app.get("/confirm/:token", async (req, res) => {
-    const { token } = req.params;
-
-    jwt.verify(token, SECRET, async (err, decoded) => {
-      if (err) {
-        res.send(false);
-      } else {
-        const { id } = decoded;
-        const user = await User.findOne({
-          where: { id },
-          select: ["id", "confirmed"]
-        });
-
-        if (user) {
-          if (user.confirmed) {
-            // cannot invalidate jwt, they must expire
-
-            console.log("already confirmed");
-            res.send(true);
-          } else {
-            // QueryBuilder is most performant
-            await typeORMConnection
-              .createQueryBuilder()
-              .update(User)
-              .set({ confirmed: true })
-              .where("id = :id", { id })
-              .execute();
-
-            res.send(true);
-          }
-        } else {
-          console.log("user not found");
-          res.send(false);
-        }
-      }
-    });
-  });
-
   apolloServer.applyMiddleware({
     app: app,
     path: environment.graphqlPath,
@@ -154,7 +113,7 @@ export const startApplication = async () => {
     }
   });
 
-  const expressServer = await app.listen({ port: environment.port });
+  const expressServer = app.listen({ port: environment.port });
 
   if (process.env.NODE_ENV !== "test") {
     console.log(

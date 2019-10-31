@@ -73,5 +73,40 @@ export const Mutation = {
       console.error(error);
       return false;
     }
+  },
+  confirmAccount: async (parent, { token }, { SECRET }, info) => {
+    try {
+      const { id } = jwt.verify(token, SECRET);
+
+      const user = await User.findOne({
+        where: { id },
+        select: ["id", "confirmed"]
+      });
+
+      if (user) {
+        if (user.confirmed) {
+          console.log("already confirmed");
+          return true;
+        }
+        const conn = getConnection("default");
+
+        const updateResult = await conn
+          .createQueryBuilder()
+          .update(User)
+          .set({ confirmed: true })
+          .where("id = :id", { id })
+          .execute();
+
+        console.log(updateResult);
+
+        return true;
+      } else {
+        console.log("user not found");
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   }
 };
