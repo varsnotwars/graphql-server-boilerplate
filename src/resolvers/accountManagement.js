@@ -8,7 +8,7 @@ import { User } from "../entity/User";
 
 export const Query = {};
 export const Mutation = {
-  resetPassword: async (parent, args, { SECRET }, info) => {
+  resetPassword: async (parent, args, { SECRET }) => {
     let decoded;
     const { newPassword, token } = args;
 
@@ -48,7 +48,7 @@ export const Mutation = {
 
     return true;
   },
-  forgotPassword: async (parent, { email }, { SECRET, origin }, info) => {
+  forgotPassword: async (parent, { email }, { SECRET, origin }) => {
     const token = jwt.sign({ email }, SECRET, {
       expiresIn: "20m"
     });
@@ -65,12 +65,47 @@ export const Mutation = {
 
     return true;
   },
-  verifyToken: async (parent, { token }, { SECRET }, info) => {
+  verifyToken: async (parent, { token }, { SECRET }) => {
     try {
       jwt.verify(token, SECRET);
       return true;
     } catch (error) {
       console.error(error);
+      return false;
+    }
+  },
+  confirmAccount: async (parent, { token }, { SECRET }) => {
+    try {
+      const { id } = jwt.verify(token, SECRET);
+
+      const user = await User.findOne({
+        where: { id },
+        select: ["id", "confirmed"]
+      });
+
+      if (user) {
+        if (user.confirmed) {
+          console.log("already confirmed");
+          return true;
+        }
+        const conn = getConnection("default");
+
+        const updateResult = await conn
+          .createQueryBuilder()
+          .update(User)
+          .set({ confirmed: true })
+          .where("id = :id", { id })
+          .execute();
+
+        console.log(updateResult);
+
+        return true;
+      } else {
+        console.log("user not found");
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
       return false;
     }
   }
