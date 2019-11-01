@@ -84,7 +84,17 @@ export class TestClient {
     });
   }
 
-  async httpGet(url) {
-    return rp.get(url, { json: true });
+  async confirmAccount(token) {
+    console.log(token);
+    return rp.post(this.url, {
+      ...this.options,
+      body: {
+        query: `
+          mutation confirmAccount {
+            confirmAccount(token: "${token}")
+          }
+        `
+      }
+    });
   }
 }

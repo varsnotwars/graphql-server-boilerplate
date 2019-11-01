@@ -6,7 +6,6 @@ import {
   mustBeLoggedIn,
   invalidLogin
 } from "../../errors/errorMessages";
-import { emailService } from "../../services/emailService";
 import { TestClient } from "../TestClient";
 
 describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
@@ -21,16 +20,11 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
     expect(registerResult.data.register).toBeTruthy();
     const { id } = registerResult.data.register;
 
-    const token = await jwt.sign({ id }, SECRET, { expiresIn: "5m" });
+    const token = jwt.sign({ id }, SECRET, { expiresIn: "5m" });
 
-    const link = emailService.createConfirmationLink(
-      `${environment.host}:${environment.port}`,
-      token
-    );
+    const confirmResult = await client.confirmAccount(token);
 
-    const confirmResult = await client.httpGet(link);
-
-    expect(confirmResult).toBe(true);
+    expect(confirmResult).toEqual({ data: { confirmAccount: true } });
 
     const loginResult = await client.login(testEmail, testPassword);
     expect(loginResult.data).toBeTruthy();
@@ -128,12 +122,9 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
 
     const { id } = result.data.register;
     const token = await jwt.sign({ id }, SECRET, { expiresIn: "5m" });
-    const link = emailService.createConfirmationLink(
-      `${environment.host}:${environment.port}`,
-      token
-    );
-    const confirmResult = await session1.httpGet(link);
-    expect(confirmResult).toBe(true);
+
+    const confirmResult = await session1.confirmAccount(token);
+    expect(confirmResult).toEqual({ data: { confirmAccount: true } });
 
     await session1.login(testEmail, testPassword);
     await session2.login(testEmail, testPassword);
