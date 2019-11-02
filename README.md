@@ -41,6 +41,8 @@
 - cleanup the test file names and folder structures
 - general code cleanup
 - put expect res.errors toBeFalsy checks before all res.data.resolverName checks
+- rework tests so they can run in parallel
+- fix hanging tests requiring the use of `--forceExit`
 
 ## Note
 
