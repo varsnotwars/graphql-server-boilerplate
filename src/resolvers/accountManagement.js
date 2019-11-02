@@ -90,14 +90,12 @@ export const Mutation = {
         }
         const conn = getConnection("default");
 
-        const updateResult = await conn
+        await conn
           .createQueryBuilder()
           .update(User)
           .set({ confirmed: true })
           .where("id = :id", { id })
           .execute();
-
-        console.log(updateResult);
 
         return true;
       } else {
