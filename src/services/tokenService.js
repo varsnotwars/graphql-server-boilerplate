@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-// TODO: creare separate secrets for confirm and reset?
+// TODO: create separate secrets for confirm and reset?
 import { SECRET } from "../server";
 
 const defaultConfirmOptions = { expiresIn: "1d" };

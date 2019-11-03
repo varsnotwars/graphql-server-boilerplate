@@ -1,7 +1,5 @@
 import { emailService } from "../../services/emailService";
-import jwt from "jsonwebtoken";
 import { v4 } from "uuid";
-import { SECRET } from "../../server";
 import { tokenService } from "../../services/tokenService";
 
 describe("[EMAIL SERVICE]", () => {
