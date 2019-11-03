@@ -7,6 +7,7 @@ import { User } from "../entity/User";
 import { createFromYupError } from "../utils/createFromYupError";
 import { emailService } from "../services/emailService";
 import { isAuthenticated } from "../middleware/isAuthenticated";
+import { tokenService } from "../services/tokenService";
 
 export const Query = {
   profile: isAuthenticated.createResolver(async (parent, args, { req }) => {
@@ -52,9 +53,7 @@ export const Mutation = {
     const newUser = await userModel.save();
 
     if (process.env.NODE_ENV !== "test") {
-      const token = jwt.sign({ id: newUser.id }, SECRET, {
-        expiresIn: "1d"
-      });
+      const token = tokenService.createConfirmAccountToken({ id: newUser.id });
 
       const url = emailService.createConfirmationLink(origin, token);
       const html = emailService.createConfirmEmail(url);

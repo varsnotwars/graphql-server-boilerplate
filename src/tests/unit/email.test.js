@@ -2,12 +2,16 @@ import { emailService } from "../../services/emailService";
 import jwt from "jsonwebtoken";
 import { v4 } from "uuid";
 import { SECRET } from "../../server";
+import { tokenService } from "../../services/tokenService";
 
 describe("[EMAIL SERVICE]", () => {
   test("creates confirmation link", () => {
     const testOrigin = "http://localhost:4000";
     const testUserId = v4();
-    const testToken = jwt.sign({ id: testUserId }, SECRET, { expiresIn: "5m" });
+    const testToken = tokenService.createConfirmAccountToken(
+      { id: testUserId },
+      { expiresIn: "5m" }
+    );
     const testConfirmationLink = `${testOrigin}/confirm/${testToken}`;
 
     const confirmationLink = emailService.createConfirmationLink(
@@ -21,7 +25,10 @@ describe("[EMAIL SERVICE]", () => {
   test("creates reset password link", () => {
     const testOrigin = "http://localhost:4000";
     const testUserId = v4();
-    const testToken = jwt.sign({ id: testUserId }, SECRET, { expiresIn: "5m" });
+    const testToken = tokenService.createResetPasswordToken(
+      { id: testUserId },
+      { expiresIn: "5m" }
+    );
     const testResetPasswordLink = `${testOrigin}/reset-password/${testToken}`;
 
     const resetLink = emailService.createResetPasswordLink(
@@ -35,7 +42,10 @@ describe("[EMAIL SERVICE]", () => {
   test("creates confirm email html body", () => {
     const testOrigin = "http://localhost:4000";
     const testUserId = v4();
-    const testToken = jwt.sign({ id: testUserId }, SECRET, { expiresIn: "5m" });
+    const testToken = tokenService.createConfirmAccountToken(
+      { id: testUserId },
+      { expiresIn: "5m" }
+    );
     const testConfirmationLink = `${testOrigin}/confirm/${testToken}`;
 
     const confirmationLink = emailService.createConfirmationLink(
@@ -56,7 +66,10 @@ describe("[EMAIL SERVICE]", () => {
   test("creates reset password html body", () => {
     const testOrigin = "http://localhost:4000";
     const testUserId = v4();
-    const testToken = jwt.sign({ id: testUserId }, SECRET, { expiresIn: "5m" });
+    const testToken = tokenService.createResetPasswordToken(
+      { id: testUserId },
+      { expiresIn: "5m" }
+    );
     const testResetLink = `${testOrigin}/reset-password/${testToken}`;
 
     const resetLink = emailService.createResetPasswordLink(

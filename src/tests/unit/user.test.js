@@ -7,6 +7,7 @@ import {
   invalidLogin
 } from "../../errors/errorMessages";
 import { TestClient } from "../TestClient";
+import { tokenService } from "../../services/tokenService";
 
 describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
   let expressServer, apolloServer, typeORMConnection, environment, url;
@@ -20,7 +21,10 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
     expect(registerResult.data.register).toBeTruthy();
     const { id } = registerResult.data.register;
 
-    const token = jwt.sign({ id }, SECRET, { expiresIn: "5m" });
+    const token = tokenService.createConfirmAccountToken(
+      { id },
+      { expiresIn: "5m" }
+    );
 
     const confirmResult = await client.confirmAccount(token);
 
@@ -64,9 +68,20 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
 
     const { id } = result.data.register;
 
-    const token = jwt.sign({ id }, SECRET, { expiresIn: "1m" });
+    const confirmToken = tokenService.createConfirmAccountToken(
+      { id },
+      { expiresIn: "1m" }
+    );
+    jwt.verify(confirmToken, SECRET, async (err, decoded) => {
+      expect(err).toBeFalsy();
+      expect(decoded.id).toBe(id);
+    });
 
-    jwt.verify(token, SECRET, async (err, decoded) => {
+    const resetToken = tokenService.createConfirmAccountToken(
+      { id },
+      { expiresIn: "1m" }
+    );
+    jwt.verify(resetToken, SECRET, async (err, decoded) => {
       expect(err).toBeFalsy();
       expect(decoded.id).toBe(id);
     });
@@ -121,7 +136,10 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
     expect(result.data.register).toBeTruthy();
 
     const { id } = result.data.register;
-    const token = await jwt.sign({ id }, SECRET, { expiresIn: "5m" });
+    const token = tokenService.createConfirmAccountToken(
+      { id },
+      { expiresIn: "5m" }
+    );
 
     const confirmResult = await session1.confirmAccount(token);
     expect(confirmResult).toEqual({ data: { confirmAccount: true } });
@@ -170,7 +188,10 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
     expect(registerResult.data.register).toBeTruthy();
 
     const { id } = registerResult.data.register;
-    const token = jwt.sign({ id }, SECRET, { expiresIn: "1m" });
+    const token = tokenService.createConfirmAccountToken(
+      { id },
+      { expiresIn: "1m" }
+    );
 
     const confirmResult = await client.confirmAccount(token);
     expect(confirmResult).toEqual({ data: { confirmAccount: true } });

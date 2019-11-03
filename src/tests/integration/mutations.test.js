@@ -6,6 +6,7 @@ import {
 } from "../../errors/errorMessages";
 import { startApplication, SECRET } from "../../server";
 import { TestClient } from "../TestClient";
+import { tokenService } from "../../services/tokenService";
 
 describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
   let expressServer, apolloServer, typeORMConnection, environment, url;
@@ -80,9 +81,10 @@ describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
     const { id } = result.data.register;
     const { email } = result.data.register;
 
-    const resetToken = await jwt.sign({ email }, SECRET, {
-      expiresIn: "2m"
-    });
+    const resetToken = tokenService.createResetPasswordToken(
+      { email },
+      { expiresIn: "2m" }
+    );
 
     const decoded = jwt.verify(resetToken, SECRET);
     expect(decoded.email).toEqual(email);
@@ -92,9 +94,12 @@ describe("[UNIT] [ACTION]: Register [ENTITY]: User", () => {
     expect(resetResult.data.resetPassword).toBeTruthy();
     expect(resetResult.data.resetPassword).toBe(true);
 
-    const token = await jwt.sign({ id }, SECRET, { expiresIn: "5m" });
+    const confirmToken = tokenService.createConfirmAccountToken(
+      { id },
+      { expiresIn: "5m" }
+    );
 
-    const confirmResult = await client.confirmAccount(token);
+    const confirmResult = await client.confirmAccount(confirmToken);
     expect(confirmResult).toEqual({ data: { confirmAccount: true } });
 
     const loginResult = await client.login(testEmail, newPassword);

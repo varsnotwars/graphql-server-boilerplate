@@ -5,6 +5,7 @@ import { userCreationSchema } from "../validation/userCreationSchema";
 import { createFromYupError } from "../utils/createFromYupError";
 import { emailService } from "../services/emailService";
 import { User } from "../entity/User";
+import { tokenService } from "../services/tokenService";
 
 export const Query = {};
 export const Mutation = {
@@ -48,10 +49,8 @@ export const Mutation = {
 
     return true;
   },
-  forgotPassword: async (parent, { email }, { SECRET, origin }) => {
-    const token = jwt.sign({ email }, SECRET, {
-      expiresIn: "20m"
-    });
+  forgotPassword: async (parent, { email }, { origin }) => {
+    const token = tokenService.createResetPasswordToken({ email });
 
     const url = emailService.createResetPasswordLink(origin, token);
     const html = emailService.createResetPasswordEmail(url);
