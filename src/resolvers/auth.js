@@ -49,7 +49,7 @@ export const Mutation = {
     // we need to manage not creating dupes for same client
     if (!existingSession) {
       // this is how we track all session for a single user
-      const insertResult = await conn
+      await conn
         .createQueryBuilder()
         .insert()
         .into(UserSession)

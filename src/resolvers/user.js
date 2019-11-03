@@ -52,7 +52,7 @@ export const Mutation = {
     const newUser = await userModel.save();
 
     if (process.env.NODE_ENV !== "test") {
-      const token = await jwt.sign({ id: newUser.id }, SECRET, {
+      const token = jwt.sign({ id: newUser.id }, SECRET, {
         expiresIn: "1d"
       });
 

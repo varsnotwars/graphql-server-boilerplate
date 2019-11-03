@@ -85,7 +85,6 @@ export class TestClient {
   }
 
   async confirmAccount(token) {
-    console.log(token);
     return rp.post(this.url, {
       ...this.options,
       body: {

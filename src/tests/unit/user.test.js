@@ -162,4 +162,17 @@ describe("[UNIT] [ENTITY]: User [LOGIC]: Authentication/Authorization", () => {
     expect(result.errors).toBeTruthy();
     expect(result.errors.some(e => e.message === mustBeLoggedIn)).toBeTruthy();
   });
+
+  test("can confirm account", async () => {
+    const client = new TestClient(url);
+
+    const registerResult = await client.register(testEmail, testPassword);
+    expect(registerResult.data.register).toBeTruthy();
+
+    const { id } = registerResult.data.register;
+    const token = jwt.sign({ id }, SECRET, { expiresIn: "1m" });
+
+    const confirmResult = await client.confirmAccount(token);
+    expect(confirmResult).toEqual({ data: { confirmAccount: true } });
+  });
 });
