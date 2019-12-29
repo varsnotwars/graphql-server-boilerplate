@@ -10,6 +10,6 @@ export const baseResolver = createResolver(
         Only mask outgoing errors that aren't already apollo-errors,
         such as ORM errors etc
       */
-  (root, args, context, error) =>
+  (_root, _args, _context, error) =>
     isInstance(error) ? error : new UnknownError()
 );

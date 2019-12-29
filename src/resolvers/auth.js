@@ -11,7 +11,7 @@ import { User } from "../entity/User";
 
 export const Query = {};
 export const Mutation = {
-  login: async (parent, { email, password }, { req }, info) => {
+  login: async (_parent, { email, password }, { req }) => {
     const { session, sessionID } = req;
     const conn = getConnection("default");
 
@@ -59,7 +59,7 @@ export const Mutation = {
 
     return user;
   },
-  logout: async (parent, { fromAll }, { req }, info) => {
+  logout: async (_parent, { fromAll }, { req }) => {
     const { session, sessionID } = req;
     const conn = getConnection("default");
 

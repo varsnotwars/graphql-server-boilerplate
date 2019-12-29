@@ -9,7 +9,7 @@ import { tokenService } from "../services/tokenService";
 
 export const Query = {};
 export const Mutation = {
-  resetPassword: async (parent, args, { SECRET }) => {
+  resetPassword: async (_parent, args, { SECRET }) => {
     let decoded;
     const { newPassword, token } = args;
 
@@ -49,7 +49,7 @@ export const Mutation = {
 
     return true;
   },
-  forgotPassword: async (parent, { email }, { origin }) => {
+  forgotPassword: async (_parent, { email }, { origin }) => {
     const token = tokenService.createResetPasswordToken({ email });
 
     const url = emailService.createResetPasswordLink(origin, token);
@@ -64,7 +64,7 @@ export const Mutation = {
 
     return true;
   },
-  verifyToken: async (parent, { token }, { SECRET }) => {
+  verifyToken: async (_parent, { token }, { SECRET }) => {
     try {
       jwt.verify(token, SECRET);
       return true;
@@ -73,7 +73,7 @@ export const Mutation = {
       return false;
     }
   },
-  confirmAccount: async (parent, { token }, { SECRET }) => {
+  confirmAccount: async (_parent, { token }, { SECRET }) => {
     try {
       const { id } = jwt.verify(token, SECRET);
 

@@ -1,5 +1,4 @@
 import { getConnection } from "typeorm";
-import jwt from "jsonwebtoken";
 
 import { EmailAlreadyRegisteredError } from "../errors/graphqlErrors";
 import { userCreationSchema } from "../validation/userCreationSchema";
@@ -10,7 +9,7 @@ import { isAuthenticated } from "../middleware/isAuthenticated";
 import { tokenService } from "../services/tokenService";
 
 export const Query = {
-  profile: isAuthenticated.createResolver(async (parent, args, { req }) => {
+  profile: isAuthenticated.createResolver(async (_parent, _args, { req }) => {
     const conn = getConnection("default");
     const { session } = req;
 
@@ -25,7 +24,7 @@ export const Query = {
   })
 };
 export const Mutation = {
-  register: async (parent, args, { SECRET, origin }) => {
+  register: async (_parent, args, { origin }) => {
     try {
       // abort early, cleaner to throw one error object instead of trying to parse and throw many errors
       await userCreationSchema.validate(args, { abortEarly: true });

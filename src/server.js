@@ -45,11 +45,11 @@ export const createApolloServer = () =>
     }
   });
 
-export const createOrmConnection = async connName => {
+export const createOrmConnection = async (connName = "default") => {
   const connectionOptions = await getConnectionOptions(process.env.NODE_ENV);
   return createConnection({
     ...connectionOptions,
-    name: connName || "default"
+    name: connName
   });
 };
 export const getOrmConnection = connName => getConnection(connName);
@@ -115,6 +115,7 @@ export const startApplication = async () => {
 
   const expressServer = app.listen({ port: environment.port });
 
+  // so as to not pollute the console during tests
   if (process.env.NODE_ENV !== "test") {
     console.log(
       `🚀 Server ready at ${environment.host}:${environment.port}${apolloServer.graphqlPath}`
